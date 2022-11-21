@@ -1,23 +1,24 @@
 import { useState } from 'react'
-import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Row, Col  } from 'react-bootstrap';
-import Home from './Home';
-import Video_Chat from './Video_chat';
+import {Container} from 'react-bootstrap';
 import { HashRouter as Router, Route, Routes} from 'react-router-dom'
 
-function App() {
+import './pages/styles/App.css'
+import Home from './pages/home.jsx';
+import Chatroom from './pages/chatroom.jsx';
+
+function TredagleRoutes() {
 
   return (
     <Container>
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/video_chat" element={<Video_Chat />} />  
+        <Route path="/chatroom" element={<Chatroom />} />  
       </Routes>
     </Router>
     </Container>
   )
 }
 
-export default App
+export default TredagleRoutes

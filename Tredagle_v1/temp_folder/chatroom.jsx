@@ -3,19 +3,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Col, Row, Container, Button} from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './videochat.css'
 
-const Video_Chat = () => {
+const Chatroom = () => {
     let [paired, set_paired] = useState(false);
-    
+
     return(
         <Container>
             <h1> Video streams go here</h1>
             <Row>
                 <Col xs={5} >
-                    <div className='screen'>
+                    //video screen here
+                    //creating components atm
 
-                    </div>
                     <Link to='/'>
                     <Button variant='danger'>
                         Leave
@@ -27,14 +26,12 @@ const Video_Chat = () => {
                 </Col>
                 <Col xs={2}></Col>
                 <Col xs={5}>
-                    <div className='screen'>
-
-                    </div>
-                    
+                    //video screen #2 here...
+                    //creating components atm
                 </Col>
             </Row>
         </Container>
     )
 }
 
-export default Video_Chat
+export default Chatroom
