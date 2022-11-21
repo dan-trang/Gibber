@@ -6,9 +6,9 @@ const Home = () => {
     return (
         <>
             <NavbarProp/>
-            <div class="w-full h-full flex justify-center">
-                <img src={bg_image} />
-                <div class="fixed top-1/3">
+            <div class="flex justify-center">
+                <img class="object-cover w-screen h-screen" src={bg_image} />
+                <div class="fixed my-24 top-1/3">
                     <h1 class = "py-4 text-center text-black text-5xl font-bold underline">Tredagle</h1>      
                     <div class="flex justify-center py-4">
                         <Link to="/chatroom">
