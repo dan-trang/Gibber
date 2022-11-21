@@ -9,9 +9,9 @@ function NavbarProp() {
                     <div>Tredagle</div>
                 </div>
                 <ul class="hidden sm:flex flex-1 justify-end items-center gap-12 text-bookmark-blue uppercase text-xs">
-                    <li>Stuff</li>
-                    <li>Thing</li>
-                    <li>Stuff</li>
+                    <li class="cursor-pointer">Stuff</li>
+                    <li class="cursor-pointer">Thing</li>
+                    <li class="cursor-pointer">Stuff</li>
                 </ul>
             </nav>
         </>
