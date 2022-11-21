@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import {Link, Router, Routes, Route} from 'react-router-dom';
-import Home from './pages/home.jsx';
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import Home from './pages/home.jsx'
+import Chatroom from './pages/chatroom.jsx'
 
 export default function TredagleRoutes() {
 
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route index element={<Home />} />
+        <Route path="/chatroom" element={<Chatroom/>} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   )
 }
