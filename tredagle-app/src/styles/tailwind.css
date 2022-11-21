@@ -5,7 +5,7 @@
 /* apply globally to all specified tags */
 @layer base {
     h1 {
-        @apply text-indigo-600;
+        @apply text-white;
     }
 }
 
