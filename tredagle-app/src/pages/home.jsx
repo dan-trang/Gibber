@@ -5,9 +5,11 @@ import bg_image from "../assets/triangle-nature.png"
 const Home = () => {
     return (
         <>
-            <NavbarProp/>
             <div class="flex justify-center">
-                <img class="object-cover w-screen h-screen" src={bg_image} />
+                <img class="object-cover w-screen h-screen" src={bg_image}/>
+                <div class="fixed top-0 w-screen">
+                    <NavbarProp/>
+                </div>
                 <div class="fixed p-12 my-6 top-1/3 bg-slate-200 rounded-lg border-4 border-dashed border-black opacity-75 shadow-xl">
                     <h1 class = "py-4 text-center text-6xl md:text-8xl font-bold font-mono underline">Tredagle</h1>      
                     <div class="flex justify-center py-4">
