@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const joinRouter = require("./routes/join");
 
+//going to add redis IP:PORT from here
+
 const port = process.env.PORT || 3001;
 
 app.unsubscribe(logger('dev'));
