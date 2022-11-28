@@ -9,7 +9,7 @@ const randInt = require("./randomNum.js");
 //going to add redis IP:PORT from here
 
 app.use(cors());
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3007;
 
 //app.unsubscribe(logger('dev'));
 app.use(cors());
@@ -28,10 +28,11 @@ const io = socketio(expressServer, {
 io.on('connection',(socket)=>{
     socket.emit('messageFromServer', {data: "Hello and welcome!"})
     socket.on('userID', (userID)=> {
-        console.log(userID.data);
+        //temp emit for testing
+        console.log('main:' + userID.data);
+        socket.emit('remoteID', {remote: userID.data});
     });
     socket.on('join', (dataFromClient)=> {
-        console.log(dataFromClient);
         //generate User ID, add user to waiting room,
         //add socketID to database, only want to 
         //update specific user based on id
