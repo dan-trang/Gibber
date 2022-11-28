@@ -4,33 +4,50 @@ import bg_chatroom from "../assets/gradient-1.jpg"
 import { Link } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 import { Peer } from 'peerjs'
+
 const Chatroom = ( {socket} ) => {
-    const localRef = useRef();
-    const remoteRef = useRef();
-    let [remoteID, setremoteID ] = useState("");
+    const localUserVideoRef = useRef();
+    const remoteUserVideoRef = useRef();
+    let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
+
     useEffect(()=> {
         var peer = new Peer();
+        
+        /////////// TESTING //////////////
+        socket.on("remoteID", (data) => {
+            var user2ID = data.remote;
+            console.log('user2:' + user2ID)
+            setRemoteID(user2ID)
+            var call = peer.call(remoteID, localUserVideoRef.current.srcObject);
+            call.on('stream', (remoteStream) => {
+                remoteUserVideoRef.current.srcObject = remoteStream;
+                remoteUserVideoRef.current.play();
+            })
+        })
 
         peer.on("open", (id)=> {
             setLocalID(id)
             socket.emit("userID", {data: id})
-    });   
+        });   
 
+        //local user video stream
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;   
-      getUserMedia({video: true, audio: true}, (stream)=> {
-         //addVideoStream(document.getElementById("LOCAL"), stream) 
-         localRef.current.srcObject = stream;
-         localRef.current.play();
-      }); // Answer the call with an A/V stream.
-        //localRef.current.srcObject = stream;
-      
- 
+        getUserMedia({video: true, audio: true}, (stream)=> {
+            localUserVideoRef.current.srcObject = stream;
+            localUserVideoRef.current.play();
+        });
 
-    return () => {
-        socket.off("userID");
-    }
-    }, [])
+        peer.on('call', (call) => {
+            call.answer(localUserVideoRef.current.srcObject)
+        })
+        
+        return () => {
+            socket.off("userID");
+        }
+
+    }, []);
+    
     
 
     return(
@@ -41,8 +58,8 @@ const Chatroom = ( {socket} ) => {
                 </div>
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
-                <video id="LOCAL" ref={localRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
-                <video ref={remoteRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
+                <video id="LOCAL" ref={localUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
+                <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
                         <Link class="h-fit" to="/">
                             <button class="btn-leave">Leave</button>
