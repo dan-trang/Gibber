@@ -3,10 +3,30 @@ const app = express();
 const socketio = require('socket.io');
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const randInt = require("./randomNum.js");
+const randInt = require("./newID.js");
+const Redis = require("ioredis");
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
 //going to add redis IP:PORT from here
+const client = new Redis({
+    host: 'redis-14138.c259.us-central1-2.gce.cloud.redislabs.com',
+    port: 14138,
+    password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
+
+});
+
+client.set('foo','bar', (err, reply) => {
+    if (err) throw err;
+    console.log(reply);
+});
+
+client.get('foo', (err, reply)=> {
+    if (err) throw err;
+    console.log(reply);
+})
+
+
+
 
 app.use(cors());
 const port = process.env.PORT || 3007;
@@ -28,27 +48,17 @@ const io = socketio(expressServer, {
 io.on('connection',(socket)=>{
     socket.emit('messageFromServer', {data: "Hello and welcome!"})
     socket.on('userID', (userID)=> {
-        //temp emit for testing
+        //userID is the peerJS ID, subject to change, user
+        //needs to be assigned a uuid
+        //if the user isn't in the user set?array? then
+        //generate a new ID and return it
         console.log('main:' + userID.data);
-        socket.emit('remoteID', {remote: userID.data});
+        //only emit remoteID when they will connect to someone
+        //else
+        // socket.emit('remoteID', {remote: userID.data});
     });
-    socket.on('join', (dataFromClient)=> {
-        //generate User ID, add user to waiting room,
-        //add socketID to database, only want to 
-        //update specific user based on id
-        io.to(socket.id).emit("channelUpdate", {
-            uid: 123125,
-            channelName: "goodmorning",
-            token: 23993249
-        })
-    })
-    socket.on('imHome', (data)=> {
-        console.log(`This be the data: ${data.data}`);
-        io.to(socket.id).emit("message", {
-            data: "Hey there buddy pal"
-        })
-    })
-})
+   
+});
 
 
 module.exports = app;

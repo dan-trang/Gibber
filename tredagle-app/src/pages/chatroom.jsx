@@ -10,6 +10,7 @@ const Chatroom = ( {socket} ) => {
     const remoteUserVideoRef = useRef();
     let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
+    let [userID, setUserID] = useState("");
 
     useEffect(()=> {
         var peer = new Peer();
@@ -29,7 +30,12 @@ const Chatroom = ( {socket} ) => {
         peer.on("open", (id)=> {
             setLocalID(id)
             socket.emit("userID", {data: id})
-        });   
+        });  
+        
+        socket.on('UID', (userID)=> {
+            //generated using uuv4
+            setUserID(userID.data)
+        });
 
         //local user video stream
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;   
@@ -43,7 +49,9 @@ const Chatroom = ( {socket} ) => {
         })
         
         return () => {
-            socket.off("userID");
+            socket.off("remoteID");
+            socket.off('userID');
+            socket.off("UID");
         }
 
     }, []);
