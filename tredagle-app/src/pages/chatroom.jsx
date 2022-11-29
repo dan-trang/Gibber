@@ -29,10 +29,13 @@ const Chatroom = ( {socket} ) => {
 
         peer.on("open", (id)=> {
             setLocalID(id)
-            socket.emit("userID", {data: id})
+            socket.emit("peerID", {
+                peerID: id,
+                userID: userID
+            })
         });  
         
-        socket.on('UID', (userID)=> {
+        socket.on('newUID', (userID)=> {
             //generated using uuv4
             setUserID(userID.data)
         });
@@ -50,7 +53,7 @@ const Chatroom = ( {socket} ) => {
         
         return () => {
             socket.off("remoteID");
-            socket.off('userID');
+            socket.off('peerID');
             socket.off("UID");
         }
 
