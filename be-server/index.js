@@ -6,32 +6,16 @@ const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
 const uuidv4 = require("uuid");
+
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
 //going to add redis IP:PORT from here
+//need .env file to store security sensitive info like this Redis password and Port#
 const client = new Redis({
     host: 'redis-14138.c259.us-central1-2.gce.cloud.redislabs.com',
     port: 14138,
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
-
 });
-
-client.set('foo','bar', (err, reply) => {
-    if (err) throw err;
-    console.log(reply);
-});
-
-client.get('foo', (err, reply)=> {
-    if (err) throw err;
-    console.log(reply);
-})
-
-// client.hset('8654985469', 'peerID', "435987549387kuwgh").then(
-// client.hget('8654985469', 'peerID', (err, res)=> {
-//     console.log(res)
-// })
-// )
-
 
 
 
@@ -52,40 +36,45 @@ const io = socketio(expressServer, {
     }
 });
 
-//Functions for redis
-async function checkForUser(userID) {
-        const alreadyJoined = await client.hexists(users, `${userID}`, (err, res)=> {
-            if (err) console.log(err);
-            return res;
-        }
-        )
-    
-}
-
-//timestamp could go here
-async function addUserToDB(userID, peerID) {
-
-    const result1 = await client.hset(userID, 'peerID', peerID, (err, res)=> {
+/*
+* DESC: Below are functions for communicating with Redis
+* params: err -- error message returned if failed to execute
+*         res -- response from Redis in the form of string (?)
+*         userID -- unique and persistent IDs given to users as they connect with the website
+*         peerID -- unique but temporary IDs to help socket.io connect two remote peers to webcall
+*/
+async function addUserToDB(userID, peerID) { //timestamp param could go here
+    const result = await client.hset(userID, 'peerID', peerID, (err, res)=> {
+        if(err) console.log(err);
         return res;
     });
-    console.log(result1)
+    if(result == 0) console.log("[Updated Existing User] user: " + userID + " / peerID: " + peerID)
+    if(result == 1) console.log("[New User Added] user: " + userID + " / peerID: " + peerID)
 }
 
-addUserToDB("dfasfdsah463432095u5432hngw", "023980423")
-//End functions for redis
+async function checkForUser(userID) {
+    const alreadyJoined = await client.hexists(users, `${userID}`, (err, res)=> {
+        if (err) console.log(err);
+        return res;
+    })
+}
 
-io.on('connection',(socket)=>{
-    socket.emit('messageFromServer', {data: "Hello and welcome!"})
-    socket.on('peerID', (user)=> {
+
+/* DESC: Socket.io functionalities
+* params: 
+*
+*
+*/
+io.on('connection', (socket) => {
+    socket.emit('messageFromServer', {data: "Hello and welcome!"});
+    socket.on('peerID', (user) => {
         //userID is the peerJS ID, subject to change, user
         //needs to be assigned a uuid
-        //if the user isn't in the user set?array? then
-        //generate a new ID and return it
         console.log('main:' + user.peerID);
         console.log("USERID: " + user.userID);
         //I want to use a hash for the user to store data
         let inRoom = checkForUser(user.userID);
-        if(!inRoom) {
+        if(!inRoom) { //if User does not exist in waiting list, then generate a new user ID and return it
             //generate userID
             let userID = uuidv4();
            //emit userID event back to specific socket
@@ -116,8 +105,28 @@ io.on('connection',(socket)=>{
         //else
         // socket.emit('remoteID', {remote: userID.data});
     });
-   
 });
 
-
 module.exports = app;
+
+////////// THROW TESTS IN HERE  ////////////
+console.log("########  TESTS  ########")
+const testHashKey = "hash_key01"
+const testHashValue = "hash_value01"
+
+client.hset([testHashKey, 'peerID', testHashValue], (err, res) => {
+    if(res == 0) console.log("[Hash SET: Already Exists] key: " + testHashKey + " / value: " + testHashValue)
+    if(res == 1) console.log("[Hash SET: New Entry] key: " + testHashKey + " / value: " + testHashValue)
+})
+
+client.hget(testHashKey, 'peerID', (err, res) => {
+    if(!res){
+        console.log("[Hash GET: Failed to retrieve] from: " + testHashKey)
+    } else{
+        console.log("[Hash GET] from: " + testHashKey + " / received: " + res)
+    }
+})
+
+addUserToDB("John.Doe", "0987654321")
+////////////////////////////////////////////
+
