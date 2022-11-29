@@ -46,6 +46,7 @@ const io = socketio(expressServer, {
         //methods: ["GET", "POST"]
     }
 });
+
 /*
 * DESC: Below are functions for communicating with Redis
 * params: err -- error message returned if failed to execute
