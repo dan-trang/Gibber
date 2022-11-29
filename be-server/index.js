@@ -8,6 +8,7 @@ const Redis = require("ioredis");
 //const uuidv4 = require("uuid");
 const { v4: uuidv4 } = require('uuid');
 
+
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
 //going to add redis IP:PORT from here
@@ -17,6 +18,14 @@ const client = new Redis({
     port: 14138,
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
 });
+
+//Get redis lock to make multiple actions atomic
+const lock = require("ioredis-lock").createLock(client, {
+    retries: 3
+});
+
+const LockAcquisitionError = lock.LockAcquisitionError;
+const LockReleaseError = lock.LockReleaseError;
 
 
 
@@ -146,6 +155,42 @@ addUserToWaitingRoom(id).then(async (err, res)=> {
         console.log(res)
     })
 })
+// addUserToWaitingRoom(id).then(async (err, res)=> {
+//     let list = await client.lrange('waitingRoom',0,-1);
+//     console.log(list)
+//     let key = await client.keys('waitingRoom');
+//     console.log("key is key: " + key)
+//     let pops = await client.lpop('waitingRoom', (err,res)=> {
+//         console.log(res)
+//     })
+// })
+
+let myfunc = async() => {
+    return 'monkeys';
+}
+
+var monkey = await myfunc();
+
+console.log(monkey);
+
+lock.acquire('app:feature:lock').then(async () => {
+    // Lock has been acquired
+    //check if any user inCall and free
+        //check if user is in waiting room   
+        //else pair self with inCall and free person
+    //else add self to back of queue
+        //if two users in queue pair them
+        //else do nothing
+
+    return lock.release();
+  }).then(() => {
+    // Lock has been released
+    console.log("WAHWAHWEEWAH")
+  }).catch(LockAcquisitionError, (err) => {
+    // The lock could not be acquired
+  }).catch(LockReleaseError, (err) => {
+    // The lock could not be released
+  });
 
 //addUserToDB("John.Doe", "0987654321")
 ////////////////////////////////////////////
