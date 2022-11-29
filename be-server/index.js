@@ -32,7 +32,8 @@ app.use(bodyParser.json());
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
-        origin: "*"
+        origin: "https://capable-toffee-ebaa27.netlify.app/",
+        //methods: ["GET", "POST"]
     }
 });
 /*
