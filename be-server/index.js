@@ -142,7 +142,7 @@ addUserToWaitingRoom(id).then(async (err, res)=> {
     console.log(list)
     let key = await client.keys('waitingRoom');
     console.log("key is key: " + key)
-    let pops = await client.lpop('waitingRoom', (err,res)=> {
+    let pops = await client.lmpop(2,['oops', 'waitingRoom'],"LEFT", (err,res) => {
         console.log(res)
     })
 })
