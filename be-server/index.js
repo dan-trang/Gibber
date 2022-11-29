@@ -5,7 +5,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
-const uuidv4 = require("uuid");
+//const uuidv4 = require("uuid");
+const { v4: uuidv4 } = require('uuid');
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -60,7 +61,8 @@ async function checkForUser(userID) {
 }
 
 async function addUserToWaitingRoom(userID) {
-    await client.rpush('waitingRoom', `${userID}`)
+    await client.rpush('waitingRoom', `${userID}`);
+    await client.rpush('waitingRoom', `${uuidv4()}`);
     //let client1 = client.lmpop
 }
 
@@ -115,6 +117,7 @@ io.on('connection', (socket) => {
 module.exports = app;
 
 ////////// THROW TESTS IN HERE  ////////////
+client.flushall()
 console.log("########  TESTS  ########")
 const testHashKey = "hash_key01"
 const testHashValue = "hash_value01"
@@ -131,9 +134,17 @@ client.hget(testHashKey, 'peerID', (err, res) => {
         console.log("[Hash GET] from: " + testHashKey + " / received: " + res)
     }
 })
-
-addUserToWaitingRoom(uuidv4()).then(()=> {
-    client.lmpop()
+let builtins = client.getBuiltinCommands();
+console.log(builtins);
+let id = uuidv4();
+addUserToWaitingRoom(id).then(async (err, res)=> {
+    let list = await client.lrange('waitingRoom',0,-1);
+    console.log(list)
+    let key = await client.keys('waitingRoom');
+    console.log("key is key: " + key)
+    let pops = await client.lpop('waitingRoom', (err,res)=> {
+        console.log(res)
+    })
 })
 
 //addUserToDB("John.Doe", "0987654321")
