@@ -35,7 +35,6 @@ const io = socketio(expressServer, {
         origin: "*"
     }
 });
-
 /*
 * DESC: Below are functions for communicating with Redis
 * params: err -- error message returned if failed to execute
@@ -57,6 +56,11 @@ async function checkForUser(userID) {
         if (err) console.log(err);
         return res;
     })
+}
+
+async function addUserToWaitingRoom(userID) {
+    await client.rpush('waitingRoom', `${userID}`)
+    //let client1 = client.lmpop
 }
 
 
@@ -127,6 +131,10 @@ client.hget(testHashKey, 'peerID', (err, res) => {
     }
 })
 
-addUserToDB("John.Doe", "0987654321")
+addUserToWaitingRoom(uuidv4()).then(()=> {
+    client.lmpop()
+})
+
+//addUserToDB("John.Doe", "0987654321")
 ////////////////////////////////////////////
 
