@@ -5,9 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
-//const uuidv4 = require("uuid");
-const { v4: uuidv4 } = require('uuid');
-
+const uuidv4 = require("uuid");
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -18,21 +16,6 @@ const client = new Redis({
     port: 14138,
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
 });
-
-//REDIS data structures:
-/*
-
-
-*/
-
-
-//Get redis lock to make multiple actions atomic
-const lock = require("ioredis-lock").createLock(client, {
-    retries: 3
-});
-
-const LockAcquisitionError = lock.LockAcquisitionError;
-const LockReleaseError = lock.LockReleaseError;
 
 
 
@@ -53,7 +36,6 @@ const io = socketio(expressServer, {
         //methods: ["GET", "POST"]
     }
 });
-
 /*
 * DESC: Below are functions for communicating with Redis
 * params: err -- error message returned if failed to execute
@@ -76,6 +58,12 @@ async function addUserToDB(userID, peerID, socketid) { //timestamp param could g
 //         return res;
 //     })
 // }
+
+async function addUserToWaitingRoom(userID) {
+    await client.rpush('waitingRoom', `${userID}`);
+    await client.rpush('waitingRoom', `${uuidv4()}`);
+    //let client1 = client.lmpop
+}
 
 async function addUserToWaitingRoom(userID) {
     await client.rpush('waitingRoom', `${userID}`);
@@ -182,34 +170,7 @@ client.hget(testHashKey, 'peerID', (err, res) => {
         console.log("[Hash GET] from: " + testHashKey + " / received: " + res)
     }
 })
-// let builtins = client.getBuiltinCommands();
-// console.log(builtins);
-// let id = uuidv4();
-// addUserToWaitingRoom(id).then(async (err, res)=> {
-//     let list = await client.lrange('waitingRoom',0,-1);
-//     console.log(list)
-//     let key = await client.keys('waitingRoom');
-//     console.log("key is key: " + key)
-//     let pops = await client.lmpop(2,['oops', 'waitingRoom'],"LEFT", (err,res) => {
-//         console.log(res)
-//     })
-// })
-// addUserToWaitingRoom(id).then(async (err, res)=> {
-//     let list = await client.lrange('waitingRoom',0,-1);
-//     console.log(list)
-//     let key = await client.keys('waitingRoom');
-//     console.log("key is key: " + key)
-//     let pops = await client.lpop('waitingRoom', (err,res)=> {
-//         console.log(res)
-//     })
-// })
 
-
-
-
-
-
-
-//addUserToDB("John.Doe", "0987654321")
+addUserToDB("John.Doe", "0987654321")
 ////////////////////////////////////////////
 
