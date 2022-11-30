@@ -38,7 +38,7 @@ app.use(bodyParser.json());
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
-        origin: "https://tredagle.herokuapp.com/",
+        origin: "https://capable-toffee-ebaa27.netlify.app/",
         method: "GET, POST"
     }
 });
