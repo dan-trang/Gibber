@@ -17,6 +17,7 @@ const Chatroom = ( {socket} ) => {
         
         /////////// TESTING //////////////
         socket.on("remoteID", (data) => {
+            console.log("RemoteID sent")
             var user2ID = data.remote;
             console.log('user2:' + user2ID)
             setRemoteID(user2ID)
@@ -42,6 +43,7 @@ const Chatroom = ( {socket} ) => {
             //generated using uuv4
             console.log(`[LOCAL STORAGE RECEIVED]: ${userID.newUID}`)
             localStorage.setItem('userID', `${userID.newUID}`);
+            console.log("SEt the LOCAL Storage")
             //setUserID(userID.data)
         });
 

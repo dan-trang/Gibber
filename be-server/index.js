@@ -6,7 +6,8 @@ const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
 const { v4: uuidv4 } = require('uuid');
-const Origin = "https://capable-toffee-ebaa27.netlify.app";
+//const Origin = "https://capable-toffee-ebaa27.netlify.app";
+const Origin = "http://127.0.0.1:5173/"
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -30,22 +31,20 @@ const port = process.env.PORT || 3007;
 
 //app.unsubscribe(logger('dev'));
 app.use(cors({
-    origin: Origin,
-    credentials: true
+    origin: "*"
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.set("trust proxy", true);
+//app.set("trust proxy", true);
 
 //app.use("/join", joinRouter);
 
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
-        origin: Origin,
+        origin: "*",
         method: "GET, POST",
-        credentials: true
     }
 });
 
