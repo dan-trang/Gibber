@@ -17,7 +17,7 @@ const client = new Redis({
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
 });
 
-const lock = require('ioredis-lock').createLock(client);
+const lock = require('./public_modules/ioredis-lock').createLock(client);
  
 const LockAcquisitionError = lock.LockAcquisitionError;
 const LockReleaseError = lock.LockReleaseError;
@@ -35,7 +35,7 @@ app.use(bodyParser.json());
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
-        origin: "https://capable-toffee-ebaa27.netlify.app/",
+        origin: "*",
         //methods: ["GET", "POST"]
     }
 });
@@ -47,8 +47,8 @@ const io = socketio(expressServer, {
 *         userID -- unique and persistent IDs given to users as they connect with the website
 *         peerID -- unique but temporary IDs to help socket.io connect two remote peers to webcall
 */
-async function addUserToDB(userID, peerID, socketid) { //timestamp param could go here
-    const result = await client.hset(userID, 'peerID', peerID, 'socketid', socketid, (err, res)=> {
+async function addUserToDB(userID, peerID, socketID) { //timestamp param could go here
+    const result = await client.hset(userID, 'peerID', peerID, 'socketID', socketID, (err, res)=> {
         if(err) console.log(err);
         return res;
     });
@@ -89,6 +89,8 @@ io.on('connection', (socket) => {
     socket.on('peerID', async (user) => {
         //userID is the peerJS ID, subject to change, user
         //needs to be assigned a uuid
+        console.log(`SOCKETID: 
+        ${socket.id}`);
         console.log('main:' + user.peerID);
         console.log("USERID: " + user.userID);
         //I want to use a hash for the user to store data
@@ -125,11 +127,16 @@ io.on('connection', (socket) => {
                     if(length > 1) {
                         let user1 = await client.lpop('waitingRoom');
                         let user2 = await client.lpop('waitingRoom');
-                        let socket1peerid = await client.hget(user1, (err,res)=> {
+                        let socketid1 = await client.hget(user1, "socketID", (err,res)=> {
+                            if(err) console.log(err)
+                            else console.log(res)
+                        });
+                        let peerid1 = await client.hget(user1, "peerID", (err,res)=> {
                             if(err) console.log(err)
                             else console.log(res)
                         })
-
+                        console.log(`PEERID: ${peerid1} and SOCKETID: ${socketid1}` )
+                        io.to(socketid1).emit('remoteID', {remote: peerid1})
 
                     }
                 
