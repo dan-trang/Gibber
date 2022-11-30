@@ -40,7 +40,7 @@ const Chatroom = ( {socket} ) => {
         
         socket.on('newUID', (userID)=> {
             //generated using uuv4
-            console.log(`WE ARE SETTIING UID TO: ${userID.newUID}`)
+            console.log(`[LOCAL STORAGE RECEIVED]: ${userID.newUID}`)
             localStorage.setItem('userID', `${userID.newUID}`);
             //setUserID(userID.data)
         });

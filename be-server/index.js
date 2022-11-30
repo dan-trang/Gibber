@@ -59,9 +59,9 @@ async function addUserToDB(userID, peerID, socketID) { //timestamp param could g
 async function checkForUser(userID, peerID) {
     const alreadyJoined = await client.hexists(`${userID}`,"peerID",(err, res)=> {
         if (err) console.log(err);
-        console.log("IN CHECK FOR USER")
-        console.log(`userID: ${res}`)
-        
+        if(res == 0) console.log(`[User DNE in DB] status #: ${res}`)
+        if(res == 1) console.log(`[User Exists in DB] status #: ${res}`)
+
         return res;
     })
     if(alreadyJoined != 0) {
@@ -70,18 +70,11 @@ async function checkForUser(userID, peerID) {
     return alreadyJoined;
 }
 
-async function addUserToWaitingRoom(userID) {
-    await client.rpush('waitingRoom', `${userID}`);
-    await client.rpush('waitingRoom', `${uuidv4()}`);
-    //let client1 = client.lmpop
-}
-
-async function addUserToWaitingRoom(userID) {
-    await client.rpush('waitingRoom', `${userID}`);
-    await client.rpush('waitingRoom', `${uuidv4()}`);
-    //let client1 = client.lmpop
-}
-
+// async function addUserToWaitingRoom(userID) {
+//     await client.rpush('waitingRoom', `${userID}`);
+//     await client.rpush('waitingRoom', `${uuidv4()}`);
+//     //let client1 = client.lmpop
+// }
 
 /* DESC: Socket.io functionalities
 * params: 
@@ -98,16 +91,19 @@ io.on('connection', (socket) => {
         // console.log('main:' + user.peerID);
         console.log("USERID: " + user.userID);
         //I want to use a hash for the user to store data
-        let inRoom = await checkForUser(user.userID);
-        console.log("inroom AMIAMIAMI inroom " + inRoom)
-        if(inRoom == 0) { //if User does not exist in waiting list, then generate a new user ID and return it
+        let userInDatabase = await checkForUser(user.userID);
+        if(userInDatabase == 0) console.log("[User no existo in DB]" + userInDatabase)
+        if(userInDatabase == 1) console.log("[User Exists in DB]" + userInDatabase)
+        if(userInDatabase == 0) { //if User does not exist in Database as a userhash, then generate a new user ID and return it
             //generate userID
-            let userID = uuidv4();
-            console.log("YOYOYOYOYOYO")
+            var userID = uuidv4();
+            console.log("[NEW userID generated for ya]: " + userID)
+
            //emit userID event back to specific socket
             io.to(socket.id).emit('newUID', {
                 newUID: userID
             })
+
             addUserToDB(userID, user.peerID, socket.id);
             //Two queues: in call and waiting
             //implemented with redis list
@@ -117,44 +113,6 @@ io.on('connection', (socket) => {
                 //if length>0
                 //add this user to waiting list 
                 //pair first two users in waiting room
-                lock.acquire('app:feature:lock').then(async () => {
-                    // Lock has been acquired
-                    //check if any user inCall and free
-                        //check if user is in waiting room   
-                        //else pair self with inCall and free person
-                    //else add self to back of queue
-                        //if two users in queue pair them
-                        //else do nothing
-                    await client.rpush('waitingRoom',userID );
-                    let length = await client.llen('waitingRoom');
-                    let contents = await client.lrange('waitingRoom',0,-1);
-                    console.log(`Thee waitingROOM is ${contents}`)
-                    console.log(length + " IS THE LENGTH")
-                    if(length > 1) {
-                        let user1 = await client.lpop('waitingRoom');
-                        let user2 = await client.lpop('waitingRoom');
-                        let socketid1 = await client.hget(user1, "socketID", (err,res)=> {
-                            if(err) console.log(err)
-                            else console.log(res)
-                        });
-                        let peerid1 = await client.hget(user1, "peerID", (err,res)=> {
-                            if(err) console.log(err)
-                            else console.log(res)
-                        })
-                        console.log(`PEERID: ${peerid1} and SOCKETID: ${socketid1}` )
-                        io.to(socketid1).emit('remoteID', {remote: peerid1})
-
-                    }
-                
-                    return lock.release();
-                  }).then(() => {
-                    // Lock has been released
-                    console.log("WAHWAHWEEWAH")
-                  }).catch(LockAcquisitionError, (err) => {
-                    // The lock could not be acquired
-                  }).catch(LockReleaseError, (err) => {
-                    // The lock could not be released
-                  });
 
             
             //check available users list, if user there
@@ -165,6 +123,45 @@ io.on('connection', (socket) => {
         else {
 
         }
+
+        lock.acquire('app:feature:lock').then(async () => {
+            // Lock has been acquired
+            //check if any user inCall and free
+                //check if user is in waiting room   
+                //else pair self with inCall and free person
+            //else add self to back of queue
+                //if two users in queue pair them
+                //else do nothing
+            await client.rpush('waitingRoom', userID );
+            let length = await client.llen('waitingRoom');
+            let contents = await client.lrange('waitingRoom',0,-1);
+            console.log(`[Waiting Room]: ${contents}`)
+            console.log("Waiting Room length = " + length)
+            if(length > 1) {
+                let user1 = await client.lpop('waitingRoom');
+                let user2 = await client.lpop('waitingRoom');
+                let socketid1 = await client.hget(user1, "socketID", (err,res)=> {
+                    if(err) console.log(err)
+                    else console.log("socketID 1: " + res)
+                });
+                let peerid1 = await client.hget(user1, "peerID", (err,res)=> {
+                    if(err) console.log(err)
+                    else console.log("peerID 1: " + res)
+                })
+                console.log(`PEERID: ${peerid1} and SOCKETID: ${socketid1}` )
+                io.to(socketid1).emit('remoteID', {remote: peerid1})
+            }
+                
+            return lock.release();
+            }).then(() => {
+            // Lock has been released
+            console.log("WAHWAHWEEWAH")
+            }).catch(LockAcquisitionError, (err) => {
+            // The lock could not be acquired
+            }).catch(LockReleaseError, (err) => {
+            // The lock could not be released
+            });
+
         //only emit remoteID when they will connect to someone
         //else
         // socket.emit('remoteID', {remote: userID.data});

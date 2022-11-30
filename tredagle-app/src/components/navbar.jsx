@@ -13,9 +13,9 @@ function NavbarProp() {
                     </div>
                 </Link>
                 <ul class="hidden md:flex flex-row flex-1 justify-end items-center gap-8 uppercase text-xs">
-                    <li class="btn-navbar">18+ Patreon</li>
-                    <li class="btn-navbar">OnlyFans</li>
-                    <li class="btn-navbar">RawrXXX</li>
+                    <li class="btn-navbar">Shop</li>
+                    <li class="btn-navbar">About Us</li>
+                    <li class="btn-navbar">Contact</li>
                     <li class="cursor-pointer">
                         <img class="w-9 h-9 rounded-full"src={profile_pic}/>
                     </li>
