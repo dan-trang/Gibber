@@ -10,7 +10,7 @@ const Chatroom = ( {socket} ) => {
     const remoteUserVideoRef = useRef();
     let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
-    let [userID, setUserID] = useState("");
+    //let [userID, setUserID] = useState("");
 
     useEffect(()=> {
         var peer = new Peer();
@@ -29,6 +29,9 @@ const Chatroom = ( {socket} ) => {
 
         peer.on("open", (id)=> {
             setLocalID(id)
+            //check local cache
+            let userID = localStorage.getItem('userID');
+            console.log(`user ID from local storage ${userID}`)
             socket.emit("peerID", {
                 peerID: id,
                 userID: userID
@@ -37,7 +40,9 @@ const Chatroom = ( {socket} ) => {
         
         socket.on('newUID', (userID)=> {
             //generated using uuv4
-            setUserID(userID.data)
+            console.log(`WE ARE SETTIING UID TO: ${userID.newUID}`)
+            localStorage.setItem('userID', `${userID.newUID}`);
+            //setUserID(userID.data)
         });
 
         //local user video stream

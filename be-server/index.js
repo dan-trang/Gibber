@@ -56,13 +56,17 @@ async function addUserToDB(userID, peerID, socketID) { //timestamp param could g
     if(result == 1) console.log("[New User Added] user: " + userID + " / peerID: " + peerID)
 }
 
-async function checkForUser(userID) {
+async function checkForUser(userID, peerID) {
     const alreadyJoined = await client.hexists(`${userID}`,"peerID",(err, res)=> {
         if (err) console.log(err);
         console.log("IN CHECK FOR USER")
         console.log(`userID: ${res}`)
+        
         return res;
     })
+    if(alreadyJoined != 0) {
+            await client.hset(`${userID}`, 'peerID', peerID);
+        }
     return alreadyJoined;
 }
 
@@ -89,19 +93,19 @@ io.on('connection', (socket) => {
     socket.on('peerID', async (user) => {
         //userID is the peerJS ID, subject to change, user
         //needs to be assigned a uuid
-        console.log(`SOCKETID: 
-        ${socket.id}`);
-        console.log('main:' + user.peerID);
+        // console.log(`SOCKETID: 
+        // ${socket.id}`);
+        // console.log('main:' + user.peerID);
         console.log("USERID: " + user.userID);
         //I want to use a hash for the user to store data
         let inRoom = await checkForUser(user.userID);
-        console.log("inroom " + inRoom)
+        console.log("inroom AMIAMIAMI inroom " + inRoom)
         if(inRoom == 0) { //if User does not exist in waiting list, then generate a new user ID and return it
             //generate userID
             let userID = uuidv4();
             console.log("YOYOYOYOYOYO")
            //emit userID event back to specific socket
-            io.to(socket.id).emit('UID', {
+            io.to(socket.id).emit('newUID', {
                 newUID: userID
             })
             addUserToDB(userID, user.peerID, socket.id);
@@ -123,6 +127,8 @@ io.on('connection', (socket) => {
                         //else do nothing
                     await client.rpush('waitingRoom',userID );
                     let length = await client.llen('waitingRoom');
+                    let contents = await client.lrange('waitingRoom',0,-1);
+                    console.log(`Thee waitingROOM is ${contents}`)
                     console.log(length + " IS THE LENGTH")
                     if(length > 1) {
                         let user1 = await client.lpop('waitingRoom');
