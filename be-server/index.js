@@ -38,15 +38,9 @@ app.use(bodyParser.json());
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
-        origin: ["*"],
-    handlePreflightRequest: (req, res) => {
-        res.writeHead(200, {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST",
-            "Access-Control-Allow-Credentials": true
-        });
-        res.end();
-    }}
+        origin: "https://tredagle.herokuapp.com/",
+        method: "GET, POST"
+    }
 });
 
 /*
