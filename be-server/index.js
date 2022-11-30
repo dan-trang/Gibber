@@ -39,7 +39,7 @@ const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
         origin: "*",
-        //methods: ["GET", "POST"]
+        methods: ["GET", "POST"]
     }
 });
 
