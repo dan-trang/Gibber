@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
 const { v4: uuidv4 } = require('uuid');
+const Origin = "https://capable-toffee-ebaa27.netlify.app";
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -25,20 +26,24 @@ const lock = require('./public_modules/ioredis-lock').createLock(client, {
 const LockAcquisitionError = lock.LockAcquisitionError;
 const LockReleaseError = lock.LockReleaseError;
 
-app.use(cors());
 const port = process.env.PORT || 3007;
 
 //app.unsubscribe(logger('dev'));
-app.use(cors());
+app.use(cors({
+    origin: Origin,
+    credentials: true
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.set("trust proxy", true);
 
 //app.use("/join", joinRouter);
 
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
     cors: {
-        origin: "https://capable-toffee-ebaa27.netlify.app",
+        origin: Origin,
         method: "GET, POST",
         credentials: true
     }
