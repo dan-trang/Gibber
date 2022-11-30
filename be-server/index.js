@@ -5,7 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
-const uuidv4 = require("uuid");
+const { v4: uuidv4 } = require('uuid');
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -17,7 +17,10 @@ const client = new Redis({
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
 });
 
-
+const lock = require('ioredis-lock').createLock(client);
+ 
+const LockAcquisitionError = lock.LockAcquisitionError;
+const LockReleaseError = lock.LockReleaseError;
 
 app.use(cors());
 const port = process.env.PORT || 3007;
@@ -52,12 +55,15 @@ async function addUserToDB(userID, peerID, socketid) { //timestamp param could g
     if(result == 1) console.log("[New User Added] user: " + userID + " / peerID: " + peerID)
 }
 
-// async function checkForUser(userID) {
-//     const alreadyJoined = await client.hexists(`${userID}`, (err, res)=> {
-//         if (err) console.log(err);
-//         return res;
-//     })
-// }
+async function checkForUser(userID) {
+    const alreadyJoined = await client.hexists(`${userID}`,"peerID",(err, res)=> {
+        if (err) console.log(err);
+        console.log("IN CHECK FOR USER")
+        console.log(`userID: ${res}`)
+        return res;
+    })
+    return alreadyJoined;
+}
 
 async function addUserToWaitingRoom(userID) {
     await client.rpush('waitingRoom', `${userID}`);
@@ -79,17 +85,18 @@ async function addUserToWaitingRoom(userID) {
 */
 io.on('connection', (socket) => {
     socket.emit('messageFromServer', {data: "Hello and welcome!"});
-    socket.on('peerID', (user) => {
+    socket.on('peerID', async (user) => {
         //userID is the peerJS ID, subject to change, user
         //needs to be assigned a uuid
         console.log('main:' + user.peerID);
         console.log("USERID: " + user.userID);
         //I want to use a hash for the user to store data
-        // let inRoom = checkForUser(user.userID);
-        let inRoom = false;
-        if(!inRoom) { //if User does not exist in waiting list, then generate a new user ID and return it
+        let inRoom = await checkForUser(user.userID);
+        console.log("inroom " + inRoom)
+        if(inRoom == 0) { //if User does not exist in waiting list, then generate a new user ID and return it
             //generate userID
             let userID = uuidv4();
+            console.log("YOYOYOYOYOYO")
            //emit userID event back to specific socket
             io.to(socket.id).emit('UID', {
                 newUID: userID
