@@ -19,9 +19,10 @@ const Chatroom = ( {socket} ) => {
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
             var user2ID = data.remote;
-            console.log('user2:' + user2ID)
+            console.log('user2 peerID:' + user2ID)
             setRemoteID(user2ID)
             var call = peer.call(remoteID, localUserVideoRef.current.srcObject);
+            console.log("Call was sent by user1")
             call.on('stream', (remoteStream) => {
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
@@ -55,6 +56,7 @@ const Chatroom = ( {socket} ) => {
         });
 
         peer.on('call', (call) => {
+            console.log("CALL WAS RECEIVED BY PEER2")
             call.answer(localUserVideoRef.current.srcObject)
         })
         
