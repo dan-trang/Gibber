@@ -17,7 +17,10 @@ const client = new Redis({
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
 });
 
-const lock = require('./public_modules/ioredis-lock').createLock(client);
+const lock = require('./public_modules/ioredis-lock').createLock(client, {
+    retries: 10,
+    delay: 10000
+});
  
 const LockAcquisitionError = lock.LockAcquisitionError;
 const LockReleaseError = lock.LockReleaseError;
@@ -64,17 +67,21 @@ async function checkForUser(userID, peerID) {
 
         return res;
     })
-    if(alreadyJoined != 0) {
+    if(alreadyJoined == 1) {
             await client.hset(`${userID}`, 'peerID', peerID);
-        }
+    }
     return alreadyJoined;
 }
 
-// async function addUserToWaitingRoom(userID) {
-//     await client.rpush('waitingRoom', `${userID}`);
-//     await client.rpush('waitingRoom', `${uuidv4()}`);
-//     //let client1 = client.lmpop
-// }
+async function checkIfUserInWaitingRoom(userID) {
+    let existInWaitingRoom = client.smismember('waitingRoom', userID, (err, res)=> {
+        if(err) console.log(err)
+        if(res == 0) console.log(`[User DNE in Waiting Room] status #: ${res}`)
+        if(res == 1) console.log(`[User Exists in Waiting Room] status #: ${res}`)
+        return res
+    })
+    return existInWaitingRoom
+}
 
 /* DESC: Socket.io functionalities
 * params: 
@@ -84,83 +91,87 @@ async function checkForUser(userID, peerID) {
 io.on('connection', (socket) => {
     socket.emit('messageFromServer', {data: "Hello and welcome!"});
     socket.on('peerID', async (user) => {
-        //userID is the peerJS ID, subject to change, user
-        //needs to be assigned a uuid
-        // console.log(`SOCKETID: 
-        // ${socket.id}`);
-        // console.log('main:' + user.peerID);
-        console.log("USERID: " + user.userID);
-        //I want to use a hash for the user to store data
-        let userInDatabase = await checkForUser(user.userID);
+
+        console.log("[Initial UserID]" + user.userID)
+
+        //check if userID is in the database as a user hash key already...
+        let userInDatabase = await checkForUser(user.userID, user.peerID);
         if(userInDatabase == 0) console.log("[User no existo in DB]" + userInDatabase)
         if(userInDatabase == 1) console.log("[User Exists in DB]" + userInDatabase)
-        if(userInDatabase == 0) { //if User does not exist in Database as a userhash, then generate a new user ID and return it
-            //generate userID
-            var userID = uuidv4();
-            console.log("[NEW userID generated for ya]: " + userID)
+        if(userInDatabase == 0) {
+            //if user.userID happens to be null, generate a new one
+            if(!user.userID){
+                var userID = uuidv4();
+                console.log("[NEW userID generated for ya]: " + userID)
+            }
+            else{
+                userID = user.userID
+            }
 
            //emit userID event back to specific socket
             io.to(socket.id).emit('newUID', {
                 newUID: userID
             })
 
-            addUserToDB(userID, user.peerID, socket.id);
-            //Two queues: in call and waiting
-            //implemented with redis list
-            //Check length of waiting list
-                //if length==0
-                //put in waiting list
-                //if length>0
-                //add this user to waiting list 
-                //pair first two users in waiting room
-
-            
-            //check available users list, if user there
-                //pair them
-            //else
-                //put them in available waiting room
-        }
-        else {
-
+            await addUserToDB(userID, user.peerID, socket.id);
+            console.log("[Added User to DB]: " + userID + " with peerID = " + user.peerID)
         }
 
         lock.acquire('app:feature:lock').then(async () => {
-            // Lock has been acquired
-            //check if any user inCall and free
-                //check if user is in waiting room   
-                //else pair self with inCall and free person
-            //else add self to back of queue
-                //if two users in queue pair them
-                //else do nothing
-            await client.rpush('waitingRoom', userID );
-            let length = await client.llen('waitingRoom');
-            let contents = await client.lrange('waitingRoom',0,-1);
-            console.log(`[Waiting Room]: ${contents}`)
-            console.log("Waiting Room length = " + length)
+            console.log("DOES USERID EXIST AT THIS POINT?: " + userID)
+
+            //if userID does not yet exist in the waiting room, add then to the room and queue 'er up!
+            let userInWaitingRoom = await checkIfUserInWaitingRoom(userID)
+            console.log("WHY ARE YOU NOT WORKING " + userInWaitingRoom)
+            if(userInWaitingRoom == 0){
+                let room_status = await client.sadd('waitingRoom', userID );
+                console.log("Waiting Room SADD = " + room_status)
+                let list_status = await client.rpush('waitingList', userID );
+                console.log("Waiting List RPUSH = " + list_status)
+            }
+
+            let length = await client.llen('waitingList');
+            console.log("Waiting List length = " + length)
+
+            let contents = await client.lrange('waitingList',0,-1);
+            console.log(`[Waiting List]: ${contents}`)
+
             if(length > 1) {
-                let user1 = await client.lpop('waitingRoom');
-                let user2 = await client.lpop('waitingRoom');
-                let socketid1 = await client.hget(user1, "socketID", (err,res)=> {
+                //pop user1 and user2 to extract info and remove from waitingList
+                let user1 = await client.lpop('waitingList');
+                let user2 = await client.lpop('waitingList');
+
+                //Get user1's socket ID
+                let user1_socketID = await client.hget(user1, "socketID", (err,res)=> {
                     if(err) console.log(err)
                     else console.log("socketID 1: " + res)
+                    return res
                 });
-                let peerid1 = await client.hget(user1, "peerID", (err,res)=> {
+
+                //Get user2's peerID
+                let user2_peerID = await client.hget(user2, "peerID", (err,res)=> {
                     if(err) console.log(err)
-                    else console.log("peerID 1: " + res)
+                    else console.log("peerID 2: " + res)
+                    return res
                 })
-                console.log(`PEERID: ${peerid1} and SOCKETID: ${socketid1}` )
-                io.to(socketid1).emit('remoteID', {remote: peerid1})
+                console.log(`[User2 PeerID]: ${user2_peerID} and [User1 socketID]: ${user1_socketID}` )
+
+                //Use socketID and peerID 
+                io.to(user1_socketID).emit('remoteID', {remote: user2_peerID})
             }
                 
             return lock.release();
-            }).then(() => {
+        }).then(() => {
             // Lock has been released
-            console.log("WAHWAHWEEWAH")
-            }).catch(LockAcquisitionError, (err) => {
+            console.log("WAHWAHWEEWAH RELEAAAASE")
+            console.log("**************  END ******************")
+        }).catch(LockAcquisitionError, (err) => {
+            console.log("Acquisition Error" + err)
             // The lock could not be acquired
-            }).catch(LockReleaseError, (err) => {
+        }).catch(LockReleaseError, (err) => {
+            console.log("Release Error" + err)
             // The lock could not be released
-            });
+        });
 
         //only emit remoteID when they will connect to someone
         //else
