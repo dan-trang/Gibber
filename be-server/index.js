@@ -5,9 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
-//const uuidv4 = require("uuid");
 const { v4: uuidv4 } = require('uuid');
-
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -19,15 +17,10 @@ const client = new Redis({
     password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
 });
 
-//Get redis lock to make multiple actions atomic
-const lock = require("ioredis-lock").createLock(client, {
-    retries: 3
-});
-
+const lock = require('ioredis-lock').createLock(client);
+ 
 const LockAcquisitionError = lock.LockAcquisitionError;
 const LockReleaseError = lock.LockReleaseError;
-
-
 
 app.use(cors());
 const port = process.env.PORT || 3007;
@@ -54,8 +47,8 @@ const io = socketio(expressServer, {
 *         userID -- unique and persistent IDs given to users as they connect with the website
 *         peerID -- unique but temporary IDs to help socket.io connect two remote peers to webcall
 */
-async function addUserToDB(userID, peerID) { //timestamp param could go here
-    const result = await client.hset(userID, 'peerID', peerID, (err, res)=> {
+async function addUserToDB(userID, peerID, socketid) { //timestamp param could go here
+    const result = await client.hset(userID, 'peerID', peerID, 'socketid', socketid, (err, res)=> {
         if(err) console.log(err);
         return res;
     });
@@ -64,10 +57,19 @@ async function addUserToDB(userID, peerID) { //timestamp param could go here
 }
 
 async function checkForUser(userID) {
-    const alreadyJoined = await client.hexists(users, `${userID}`, (err, res)=> {
+    const alreadyJoined = await client.hexists(`${userID}`,"peerID",(err, res)=> {
         if (err) console.log(err);
+        console.log("IN CHECK FOR USER")
+        console.log(`userID: ${res}`)
         return res;
     })
+    return alreadyJoined;
+}
+
+async function addUserToWaitingRoom(userID) {
+    await client.rpush('waitingRoom', `${userID}`);
+    await client.rpush('waitingRoom', `${uuidv4()}`);
+    //let client1 = client.lmpop
 }
 
 async function addUserToWaitingRoom(userID) {
@@ -84,21 +86,23 @@ async function addUserToWaitingRoom(userID) {
 */
 io.on('connection', (socket) => {
     socket.emit('messageFromServer', {data: "Hello and welcome!"});
-    socket.on('peerID', (user) => {
+    socket.on('peerID', async (user) => {
         //userID is the peerJS ID, subject to change, user
         //needs to be assigned a uuid
         console.log('main:' + user.peerID);
         console.log("USERID: " + user.userID);
         //I want to use a hash for the user to store data
-        let inRoom = checkForUser(user.userID);
-        if(!inRoom) { //if User does not exist in waiting list, then generate a new user ID and return it
+        let inRoom = await checkForUser(user.userID);
+        console.log("inroom " + inRoom)
+        if(inRoom == 0) { //if User does not exist in waiting list, then generate a new user ID and return it
             //generate userID
             let userID = uuidv4();
+            console.log("YOYOYOYOYOYO")
            //emit userID event back to specific socket
             io.to(socket.id).emit('UID', {
                 newUID: userID
             })
-            addUserToDB(userID, user.peerID);
+            addUserToDB(userID, user.peerID, socket.id);
             //Two queues: in call and waiting
             //implemented with redis list
             //Check length of waiting list
@@ -107,7 +111,37 @@ io.on('connection', (socket) => {
                 //if length>0
                 //add this user to waiting list 
                 //pair first two users in waiting room
+                lock.acquire('app:feature:lock').then(async () => {
+                    // Lock has been acquired
+                    //check if any user inCall and free
+                        //check if user is in waiting room   
+                        //else pair self with inCall and free person
+                    //else add self to back of queue
+                        //if two users in queue pair them
+                        //else do nothing
+                    await client.rpush('waitingRoom',userID );
+                    let length = await client.llen('waitingRoom');
+                    console.log(length + " IS THE LENGTH")
+                    if(length > 1) {
+                        let user1 = await client.lpop('waitingRoom');
+                        let user2 = await client.lpop('waitingRoom');
+                        let socket1peerid = await client.hget(user1, (err,res)=> {
+                            if(err) console.log(err)
+                            else console.log(res)
+                        })
 
+
+                    }
+                
+                    return lock.release();
+                  }).then(() => {
+                    // Lock has been released
+                    console.log("WAHWAHWEEWAH")
+                  }).catch(LockAcquisitionError, (err) => {
+                    // The lock could not be acquired
+                  }).catch(LockReleaseError, (err) => {
+                    // The lock could not be released
+                  });
 
             
             //check available users list, if user there
@@ -144,55 +178,7 @@ client.hget(testHashKey, 'peerID', (err, res) => {
         console.log("[Hash GET] from: " + testHashKey + " / received: " + res)
     }
 })
-let builtins = client.getBuiltinCommands();
-console.log(builtins);
-let id = uuidv4();
-addUserToWaitingRoom(id).then(async (err, res)=> {
-    let list = await client.lrange('waitingRoom',0,-1);
-    console.log(list)
-    let key = await client.keys('waitingRoom');
-    console.log("key is key: " + key)
-    let pops = await client.lmpop(2,['oops', 'waitingRoom'],"LEFT", (err,res) => {
-        console.log(res)
-    })
-})
-// addUserToWaitingRoom(id).then(async (err, res)=> {
-//     let list = await client.lrange('waitingRoom',0,-1);
-//     console.log(list)
-//     let key = await client.keys('waitingRoom');
-//     console.log("key is key: " + key)
-//     let pops = await client.lpop('waitingRoom', (err,res)=> {
-//         console.log(res)
-//     })
-// })
 
-let myfunc = async() => {
-    return 'monkeys';
-}
-
-var monkey = await myfunc();
-
-console.log(monkey);
-
-lock.acquire('app:feature:lock').then(async () => {
-    // Lock has been acquired
-    //check if any user inCall and free
-        //check if user is in waiting room   
-        //else pair self with inCall and free person
-    //else add self to back of queue
-        //if two users in queue pair them
-        //else do nothing
-
-    return lock.release();
-  }).then(() => {
-    // Lock has been released
-    console.log("WAHWAHWEEWAH")
-  }).catch(LockAcquisitionError, (err) => {
-    // The lock could not be acquired
-  }).catch(LockReleaseError, (err) => {
-    // The lock could not be released
-  });
-
-//addUserToDB("John.Doe", "0987654321")
+addUserToDB("John.Doe", "0987654321")
 ////////////////////////////////////////////
 
