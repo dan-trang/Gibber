@@ -14,19 +14,22 @@ const Chatroom = ( {socket} ) => {
 
     useEffect(()=> {
         var peer = new Peer();
-        
+        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
         /////////// TESTING //////////////
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
             var user2ID = data.remote;
             console.log('user2 peerID:' + user2ID)
             setRemoteID(user2ID)
-            var call = peer.call(remoteID, localUserVideoRef.current.srcObject);
+             
+            var call = peer.call(user2ID, localUserVideoRef.current.srcObject);
             console.log("Call was sent by user1")
-            call.on('stream', (remoteStream) => {
+            console.log("SENT: " + localUserVideoRef.current.srcObject)
+            call.on('stream', async (remoteStream) => {
                 remoteUserVideoRef.current.srcObject = remoteStream;
-                remoteUserVideoRef.current.play();
+                await remoteUserVideoRef.current.play();
             })
+
         })
 
         peer.on("open", (id)=> {
@@ -49,7 +52,6 @@ const Chatroom = ( {socket} ) => {
         });
 
         //local user video stream
-        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;   
         getUserMedia({video: true, audio: true}, (stream)=> {
             localUserVideoRef.current.srcObject = stream;
             localUserVideoRef.current.play();

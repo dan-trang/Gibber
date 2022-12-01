@@ -6,8 +6,8 @@ const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
 const { v4: uuidv4 } = require('uuid');
-//const Origin = "https://capable-toffee-ebaa27.netlify.app";
-const Origin = "http://127.0.0.1:5173/"
+const Origin = "https://capable-toffee-ebaa27.netlify.app";
+//const Origin = "http://127.0.0.1:5173/"
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
@@ -93,8 +93,12 @@ async function checkIfUserInWaitingRoom(userID) {
 *
 *
 */
+
+
 io.on('connection', (socket) => {
+    console.log("HEYEHEYHEY")
     socket.emit('messageFromServer', {data: "Hello and welcome!"});
+    
     socket.on('peerID', async (user) => {
 
         console.log("[Initial UserID]" + user.userID)
