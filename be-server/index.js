@@ -6,17 +6,19 @@ const bodyParser = require("body-parser");
 const randInt = require("./newID.js");
 const Redis = require("ioredis");
 const { v4: uuidv4 } = require('uuid');
-const Origin = "https://capable-toffee-ebaa27.netlify.app";
-//const Origin = "http://127.0.0.1:5173/"
+//const Origin = "https://capable-toffee-ebaa27.netlify.app";
+const Origin = "http://127.0.0.1:5173/"
+
+require("dotenv").config();
 
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
 //going to add redis IP:PORT from here
 //need .env file to store security sensitive info like this Redis password and Port#
 const client = new Redis({
-    host: 'redis-14138.c259.us-central1-2.gce.cloud.redislabs.com',
-    port: 14138,
-    password: '5zF1UQSFG8it6mir5FRIZuT2zN4BTPWh' 
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD
 });
 
 const lock = require('./public_modules/ioredis-lock').createLock(client, {
