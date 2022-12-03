@@ -131,8 +131,8 @@ io.on('connection', (socket) => {
             })
 
             await addUserToDB(userID, user.peerID, socket.id);
-            console.log("[Added User to DB]: " + userID + " with peerID = " + user.peerID)
-        }
+            console.log("[Added User to DB]: " + userID + " with peerID = " + user.peerID);
+        
 
         lock.acquire('app:feature:lock').then(async () => {
             console.log("DOES USERID EXIST AT THIS POINT?: " + userID)
