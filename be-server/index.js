@@ -106,18 +106,24 @@ io.on('connection', (socket) => {
         console.log("[Initial UserID]" + user.userID)
 
         //check if userID is in the database as a user hash key already...
+        var userID;
         let userInDatabase = await checkForUser(user.userID, user.peerID);
         if(userInDatabase == 0) console.log("[User no existo in DB]" + userInDatabase)
         if(userInDatabase == 1) console.log("[User Exists in DB]" + userInDatabase)
         if(userInDatabase == 0) {
             //if user.userID happens to be null, generate a new one
-            if(!user.userID){
-                var userID = uuidv4();
+            if(user.userID == undefined || user.userID == null){
+                userID = uuidv4();
                 console.log("[NEW userID generated for ya]: " + userID)
             }
-            else{
-                userID = user.userID
+            else {
+                userID = user.userID;
             }
+        }
+        else{
+            userID = user.userID;
+            console.log(`USER ID is ${userID}`);
+        }
 
            //emit userID event back to specific socket
             io.to(socket.id).emit('newUID', {
