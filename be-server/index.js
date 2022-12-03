@@ -151,6 +151,9 @@ io.on('connection', (socket) => {
                 //pop user1 and user2 to extract info and remove from waitingList
                 let user1 = await client.lpop('waitingList');
                 let user2 = await client.lpop('waitingList');
+                //remove users from waitingRoom
+                await client.srem('waitingRoom', user1);
+                await client.srem('waitingRoom', user2);
 
                 //Get user1's socket ID
                 let user1_socketID = await client.hget(user1, "socketID", (err,res)=> {

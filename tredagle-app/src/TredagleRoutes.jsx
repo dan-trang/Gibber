@@ -4,8 +4,8 @@ import Home from './pages/home.jsx'
 import Chatroom from './pages/chatroom.jsx'
 import { io } from 'socket.io-client'
 
-const socket = io(`https://tredagle.herokuapp.com/`)
-//const socket = io(`http://${window.location.hostname}:3007`)
+//const socket = io(`https://tredagle.herokuapp.com/`)
+const socket = io(`http://${window.location.hostname}:3007`)
 
 export default function TredagleRoutes() {
 
