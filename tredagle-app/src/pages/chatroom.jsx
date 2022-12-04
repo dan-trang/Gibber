@@ -61,7 +61,7 @@ const Chatroom = ( {socket} ) => {
         });
 
         //local user video stream
-        getUserMedia({video: true, audio: true}, (stream)=> {
+        getUserMedia({video: true, audio: false}, (stream)=> {
             localUserVideoRef.current.srcObject = stream;
             localUserVideoRef.current.play();
         });
