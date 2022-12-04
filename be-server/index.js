@@ -42,10 +42,7 @@ app.use(bodyParser.json());
 
 //app.use("/join", joinRouter);
 
-app.get('/socket.io', (req,res)=> {
-console.log("get request to /socket.io");
-console.log(`THE SOCKET: ${req.params.sid} said hello`);
-});
+
 
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
@@ -202,6 +199,9 @@ io.on('connection', (socket) => {
         //else
         // socket.emit('remoteID', {remote: userID.data});
     });
+    socket.on("disconnect", (reason)=> {
+        console.log(reason);
+    })
 });
 
 module.exports = app;
