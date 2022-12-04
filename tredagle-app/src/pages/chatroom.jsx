@@ -71,7 +71,7 @@ const Chatroom = ( {socket} ) => {
               call.answer(stream); // Answer the call with an A/V stream.
               call.on('stream', function(remoteStream) {
                   remoteUserVideoRef.current.srcObject = remoteStream;
-                  localUserVideoRef.current.play();
+                  remoteUserVideoRef.current.play();
               });
             }, function(err) {
               console.log('Failed to get local stream' ,err);
@@ -79,7 +79,11 @@ const Chatroom = ( {socket} ) => {
         });
         // peer.on('call', (call) => {
         //     console.log("CALL WAS RECEIVED BY PEER2")
-        //     call.answer(localUserVideoRef.current.srcObject)
+        //     call.answer(localUserVideoRef.current.srcObject);
+        //     call.on('stream', (remoteStream)=> {
+        //         remoteUserVideoRef.current.srcObject= remoteStream;
+        //         localUserVideoRef.current.play();
+        //     })
         // })
         
         return () => {
