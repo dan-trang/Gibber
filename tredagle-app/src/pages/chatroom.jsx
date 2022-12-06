@@ -15,6 +15,7 @@ const Chatroom = ( {socket} ) => {
     let [localID, setLocalID ] = useState("");
     let [dataConn, setDataConn] = useState(null);
     let [peerState, setPeer] = useState(null);
+    let [mediaConnected, setMediaConnected] = useState(false);
     //let [userID, setUserID] = useState("");
 
     useEffect(()=> {
@@ -39,6 +40,7 @@ const Chatroom = ( {socket} ) => {
             var call = peer.call(remoteID, stream);
             //once we receive the remote user stream we assign it to video container
             call.on('stream', function(remoteStream) {
+                setMediaConnected(true);
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
             });
@@ -85,6 +87,7 @@ const Chatroom = ( {socket} ) => {
             getUserMedia({video: true, audio: true}, function(stream) {
             call.answer(stream); // Answer the call with an A/V stream.
             call.on('stream', function(remoteStream) {
+                setMediaConnected(true);
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
             });
@@ -130,9 +133,10 @@ const Chatroom = ( {socket} ) => {
                 console.log("This is the data:" + data);
                 if(data == 'leave'){
                     console.log("userID = " + localStorage.getItem('userID'))
-                    remoteUserVideoRef.current.pause();
-                    remoteUserVideoRef.current.removeAttribute('src');
-                    remoteUserVideoRef.current.load();
+                    // remoteUserVideoRef.current.pause();
+                    // remoteUserVideoRef.current.removeAttribute('src');
+                    // remoteUserVideoRef.current.load();
+                    setMediaConnected(false);
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
                     //set remote peer to null, disconnect dataConnection
@@ -170,7 +174,8 @@ const Chatroom = ( {socket} ) => {
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
                 <video className="vids" id="LOCAL" ref={localUserVideoRef}></video>
-                <video className="vids" ref={remoteUserVideoRef}></video>
+                {mediaConnected && <video className="vids" ref={remoteUserVideoRef}></video> }
+                {!mediaConnected && <video className="vids"></video>}
                     <div class="flex justify-center">
                         <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peer.destroy()}}>
                             {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
