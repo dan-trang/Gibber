@@ -126,13 +126,15 @@ const Chatroom = ( {socket} ) => {
             //if current User receives data
             dataConn.on('data',(data)=> {
                 console.log("This is the data:" + data);
+                if(data == 'leave'){
+                    console.log("This is Truely the Leave msg")
+                    //put me into active singles here
+                    socket.emit('remote leave', {userId: localStorage.getItem('userID')})
+                }
             });
 
-            //if current User terminates the call by 'Leave' or closing browser
-            dataConn.on('close', () => {
-                console.log("Closing your connection...");
-                peerState.destroy();
-            })
+            //current User terminates the call by 'Leave' or closing browser
+            //turn off media stream
         })
     }
 
