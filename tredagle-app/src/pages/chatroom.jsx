@@ -19,18 +19,27 @@ const Chatroom = ( {socket} ) => {
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
             var user2ID = data.remote;
-            console.log('user2 peerID:' + user2ID)
-            setRemoteID(user2ID)
+            console.log('user2 peerID:' + user2ID);
+            setRemoteID(user2ID);
              
-            var call = peer.call(user2ID, localUserVideoRef.current.srcObject);
-            console.log("Call was sent by user1")
-            console.log("SENT: " + localUserVideoRef.current.srcObject)
-            call.on('stream', async (remoteStream) => {
+            // var call = peer.call(user2ID, localUserVideoRef.current.srcObject);
+            // console.log("Call was sent by user1")
+            // console.log("SENT: " + localUserVideoRef.current.srcObject)
+            // call.on('stream', async (remoteStream) => {
+            //     remoteUserVideoRef.current.srcObject = remoteStream;
+            //     await remoteUserVideoRef.current.play();
+            // })
+            getUserMedia({video: true, audio: true}, function(stream) {
+            var call = peer.call(user2ID, stream);
+            call.on('stream', function(remoteStream) {
                 remoteUserVideoRef.current.srcObject = remoteStream;
-                await remoteUserVideoRef.current.play();
+                remoteUserVideoRef.current.play();
+            });
+            }, function(err) {
+                console.log('Failed to get local stream' ,err);
             })
 
-        })
+        }   )
 
         peer.on("open", (id)=> {
             setLocalID(id)
@@ -52,15 +61,30 @@ const Chatroom = ( {socket} ) => {
         });
 
         //local user video stream
-        getUserMedia({video: true, audio: true}, (stream)=> {
+        getUserMedia({video: true, audio: false}, (stream)=> {
             localUserVideoRef.current.srcObject = stream;
             localUserVideoRef.current.play();
         });
-
-        peer.on('call', (call) => {
-            console.log("CALL WAS RECEIVED BY PEER2")
-            call.answer(localUserVideoRef.current.srcObject)
-        })
+        
+        peer.on('call', function(call) {
+            getUserMedia({video: true, audio: true}, function(stream) {
+              call.answer(stream); // Answer the call with an A/V stream.
+              call.on('stream', function(remoteStream) {
+                  remoteUserVideoRef.current.srcObject = remoteStream;
+                  remoteUserVideoRef.current.play();
+              });
+            }, function(err) {
+              console.log('Failed to get local stream' ,err);
+            });
+        });
+        // peer.on('call', (call) => {
+        //     console.log("CALL WAS RECEIVED BY PEER2")
+        //     call.answer(localUserVideoRef.current.srcObject);
+        //     call.on('stream', (remoteStream)=> {
+        //         remoteUserVideoRef.current.srcObject= remoteStream;
+        //         localUserVideoRef.current.play();
+        //     })
+        // })
         
         return () => {
             socket.off("remoteID");

@@ -10,6 +10,8 @@ const Origin = "https://capable-toffee-ebaa27.netlify.app";
 //const Origin = "http://127.0.0.1:5173/"
 
 require("dotenv").config();
+
+require("dotenv").config();
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
 //going to add redis IP:PORT from here
@@ -40,6 +42,8 @@ app.use(bodyParser.json());
 //app.set("trust proxy", true);
 
 //app.use("/join", joinRouter);
+
+
 
 const expressServer = app.listen(port);
 const io = socketio(expressServer, {
@@ -105,18 +109,24 @@ io.on('connection', (socket) => {
         console.log("[Initial UserID]" + user.userID)
 
         //check if userID is in the database as a user hash key already...
+        var userID;
         let userInDatabase = await checkForUser(user.userID, user.peerID);
         if(userInDatabase == 0) console.log("[User no existo in DB]" + userInDatabase)
         if(userInDatabase == 1) console.log("[User Exists in DB]" + userInDatabase)
         if(userInDatabase == 0) {
             //if user.userID happens to be null, generate a new one
-            if(!user.userID){
-                var userID = uuidv4();
+            if(user.userID == undefined || user.userID == null){
+                userID = uuidv4();
                 console.log("[NEW userID generated for ya]: " + userID)
             }
-            else{
-                userID = user.userID
+            else {
+                userID = user.userID;
             }
+        }
+        else{
+            userID = user.userID;
+            console.log(`USER ID is ${userID}`);
+        }
 
            //emit userID event back to specific socket
             io.to(socket.id).emit('newUID', {
@@ -124,8 +134,8 @@ io.on('connection', (socket) => {
             })
 
             await addUserToDB(userID, user.peerID, socket.id);
-            console.log("[Added User to DB]: " + userID + " with peerID = " + user.peerID)
-        }
+            console.log("[Added User to DB]: " + userID + " with peerID = " + user.peerID);
+        
 
         lock.acquire('app:feature:lock').then(async () => {
             console.log("DOES USERID EXIST AT THIS POINT?: " + userID)
@@ -150,6 +160,9 @@ io.on('connection', (socket) => {
                 //pop user1 and user2 to extract info and remove from waitingList
                 let user1 = await client.lpop('waitingList');
                 let user2 = await client.lpop('waitingList');
+                //remove users from waitingRoom
+                await client.srem('waitingRoom', user1);
+                await client.srem('waitingRoom', user2);
 
                 //Get user1's socket ID
                 let user1_socketID = await client.hget(user1, "socketID", (err,res)=> {
@@ -187,6 +200,9 @@ io.on('connection', (socket) => {
         //else
         // socket.emit('remoteID', {remote: userID.data});
     });
+    socket.on("disconnect", (reason)=> {
+        console.log(reason);
+    })
 });
 
 module.exports = app;
