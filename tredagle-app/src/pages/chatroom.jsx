@@ -15,7 +15,7 @@ const Chatroom = ( {socket} ) => {
     let [localID, setLocalID ] = useState("");
     let [dataConn, setDataConn] = useState(null);
     let [peerState, setPeer] = useState(null);
-    //let [userID, setUserID] = useState("");
+    let [hideDisplay, setHideDisplay] = useState(false);
 
     useEffect(()=> {
         var peer = new Peer();
@@ -25,7 +25,8 @@ const Chatroom = ( {socket} ) => {
         /*                 LOCAL HOST                   */
         //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
-            remoteUserVideoRef.current.className = 'vidsDisplay';
+            remoteUserVideoRef.current.style.display = 'inline';
+            setHideDisplay(false);
             console.log("RemoteID sent")
             var remoteID = data.remote;
             console.log('user2 peerID:' + remoteID);
@@ -82,10 +83,12 @@ const Chatroom = ( {socket} ) => {
             // });
         })
         peer.on('call', function(call) {
+            remoteUserVideoRef.current.style.display = 'inline';
+            setHideDisplay(false);
             getUserMedia({video: true, audio: true}, function(stream) {
             call.answer(stream); // Answer the call with an A/V stream.
             call.on('stream', function(remoteStream) {
-                remoteUserVideoRef.current.className = 'vidsDisplay';
+                
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
             });
@@ -131,7 +134,8 @@ const Chatroom = ( {socket} ) => {
                 console.log("This is the data:" + data);
                 if(data == 'leave'){
                     console.log("userID = " + localStorage.getItem('userID'))
-                    remoteUserVideoRef.current.className = 'vidsGone';
+                    remoteUserVideoRef.current.style.display = 'none';
+                    setHideDisplay(true);
                     // remoteUserVideoRef.current.pause();
                     // remoteUserVideoRef.current.removeAttribute('src');
                     // remoteUserVideoRef.current.load();
