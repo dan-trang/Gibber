@@ -128,6 +128,9 @@ const Chatroom = ( {socket} ) => {
                 console.log("This is the data:" + data);
                 if(data == 'leave'){
                     console.log("userID = " + localStorage.getItem('userID'))
+                    remoteUserVideoRef.current.pause();
+                    remoteUserVideoRef.current.srcObject = null;
+                    remoteUserVideoRef.current.play();
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
                     //set remote peer to null, disconnect dataConnection
@@ -169,7 +172,7 @@ const Chatroom = ( {socket} ) => {
                 <video id="LOCAL" ref={localUserVideoRef}></video>
                 <video ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
-                        <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop()}}>
+                        <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peer.destroy()}}>
                             {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
                             {(dataConn==null) && <button class="btn-leave" onClick={leaveEmptyRoom}>Leave</button>}
                         </Link>
