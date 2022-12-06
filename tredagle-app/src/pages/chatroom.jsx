@@ -168,8 +168,8 @@ const Chatroom = ( {socket} ) => {
                 </div>
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
-                <video className="vids" id="LOCAL" ref={localUserVideoRef}></video>
-                <video className="vids" ref={remoteUserVideoRef}></video>
+                <video class="w-full h-full bg-black border-2 border-stone-900" id="localVideo" ref={localUserVideoRef}></video>
+                <video class="w-full h-full bg-black border-2 border-stone-900" id="remoteVideo" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
                         <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
                             {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
