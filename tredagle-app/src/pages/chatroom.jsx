@@ -15,6 +15,7 @@ const Chatroom = ( {socket} ) => {
     let [localID, setLocalID ] = useState("");
     let [dataConn, setDataConn] = useState(null);
     let [peerState, setPeer] = useState(null);
+    let [renderVideo, setRenderVideo] = useState(false);
 
     useEffect(()=> {
         var peer = new Peer();
@@ -37,6 +38,8 @@ const Chatroom = ( {socket} ) => {
             var call = peer.call(remoteID, stream);
             //once we receive the remote user stream we assign it to video container
             call.on('stream', function(remoteStream) {
+                //turn on remote peer's video box
+                setRenderVideo(true);
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
             });
@@ -83,7 +86,9 @@ const Chatroom = ( {socket} ) => {
             getUserMedia({video: true, audio: true}, function(stream) {
             call.answer(stream); // Answer the call with an A/V stream.
             call.on('stream', function(remoteStream) {
-                
+
+                //turn on remote peer's video box
+                setRenderVideo(true);
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
             });
@@ -128,6 +133,10 @@ const Chatroom = ( {socket} ) => {
             dataConn.on('data',(data)=> {
                 console.log("This is the data:" + data);
                 if(data == 'leave'){
+
+                    //turn OFF remote user's video box
+                    setRenderVideo(false);
+
                     console.log("userID = " + localStorage.getItem('userID'))
                     // remoteUserVideoRef.current.pause();
                     // remoteUserVideoRef.current.removeAttribute('src');
@@ -144,7 +153,7 @@ const Chatroom = ( {socket} ) => {
     }
 
     const leaveRoom = (dataConn)=>{
-        console.log("i'm the leave button");
+        console.log("Leaving the call...");
         dataConn.send('leave');
         //turn off media stream: video and audio
         localUserVideoRef.current.pause();
@@ -153,13 +162,19 @@ const Chatroom = ( {socket} ) => {
     }
 
     const leaveEmptyRoom = ()=>{
-        console.log("coming at you from an EMPTY room")
+        console.log("Leaving empty room...")
         getUserM
 
         //Add to Active Singles list
         // socket.emit('remote leave');
     }
 
+    if(renderVideo==true) {
+        remoteUserVideoRef.current.className("video-box-true");
+    }
+    else{
+        remoteUserVideoRef.current.className("video-box-false");
+    }
     return(
         <>
             <div class="flex justify center">
@@ -168,13 +183,15 @@ const Chatroom = ( {socket} ) => {
                 </div>
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
-                <video className="basicvids" id="localVideo" ref={localUserVideoRef}></video>
-                <video className="basicvids" id="remoteVideo" ref={remoteUserVideoRef}></video>
+                <video class="video-box-true" id="localVideo" ref={localUserVideoRef}></video>
+                <video class="video-box-true" id="remoteVideo" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
-                        <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
-                            {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
-                            {(dataConn==null) && <button class="btn-leave" onClick={leaveEmptyRoom}>Leave</button>}
-                        </Link>
+                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
+                            <button class="btn-leave">Leave</button>
+                        </Link>}
+                        {dataConn==null && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
+                            <button class="btn-leave">Leave</button>
+                        </Link>}
                     </div>
                     <div class="flex justify-around">
                         <div>

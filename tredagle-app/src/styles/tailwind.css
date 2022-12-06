@@ -39,4 +39,13 @@
     .my-style {
         @apply w-8 h-1 bg-slate-100 rounded-sm
     }
+
+    .video-box-true {
+        @apply w-full h-full bg-black border-2 border-stone-900
+    }
+
+    .video-box-false {
+        @apply invisible w-full h-full bg-black border-2 border-stone-900
+    }
+
 }
