@@ -11,15 +11,15 @@ const Origin = "https://capable-toffee-ebaa27.netlify.app";
 
 require("dotenv").config();
 
-require("dotenv").config();
+//require("dotenv").config();
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
 //going to add redis IP:PORT from here
 //need .env file to store security sensitive info like this Redis password and Port#
 const client = new Redis({
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    password: process.env.REDIS_PASSWORD
+    host: 'redis-14138.c259.us-central1-2.gce.cloud.redislabs.com',
+    port: 14138,
+    password: 'Pj74-qDMbM7BVEpPu'
 });
 
 const lock = require('./public_modules/ioredis-lock').createLock(client, {
