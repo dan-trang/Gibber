@@ -93,6 +93,10 @@ async function checkIfUserInWaitingRoom(userID) {
     return existInWaitingRoom
 }
 
+async function addUserToActiveSingles(userID) {
+    client.rpush('activeSingles', userID);
+}
+
 /* DESC: Socket.io functionalities
 * params: 
 *
@@ -200,6 +204,25 @@ io.on('connection', (socket) => {
         //else
         // socket.emit('remoteID', {remote: userID.data});
     });
+
+    //Add user active singles
+    socket.on('remote left', async (data) => {
+        lock.acquire('app:feature:lock').then(async () => {
+            await addUserToActiveSingles(data.userID)
+            return lock.release();
+        }).then(() => {
+            // Lock has been released
+            console.log("WAHWAHWEEWAH RELEAAAASE")
+            console.log("**************  END ******************")
+        }).catch(LockAcquisitionError, (err) => {
+            console.log("Acquisition Error" + err)
+            // The lock could not be acquired
+        }).catch(LockReleaseError, (err) => {
+            console.log("Release Error" + err)
+            // The lock could not be released
+        });
+    })
+
     socket.on("disconnect", (reason)=> {
         console.log(reason);
     })

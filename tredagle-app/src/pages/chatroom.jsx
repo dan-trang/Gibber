@@ -10,27 +10,25 @@ const Chatroom = ( {socket} ) => {
     const remoteUserVideoRef = useRef();
     let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
+    let [dataConn, setDataConn] = useState(null);
     //let [userID, setUserID] = useState("");
 
     useEffect(()=> {
         var peer = new Peer();
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
-        /////////// TESTING //////////////
+    
+        //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
-            var user2ID = data.remote;
-            console.log('user2 peerID:' + user2ID);
-            setRemoteID(user2ID);
-             
-            // var call = peer.call(user2ID, localUserVideoRef.current.srcObject);
-            // console.log("Call was sent by user1")
-            // console.log("SENT: " + localUserVideoRef.current.srcObject)
-            // call.on('stream', async (remoteStream) => {
-            //     remoteUserVideoRef.current.srcObject = remoteStream;
-            //     await remoteUserVideoRef.current.play();
-            // })
+            var remoteID = data.remote;
+            console.log('user2 peerID:' + remoteID);
+            setRemoteID(remoteID);
+            //Set remote data connection to dataConn state
+            setDataConn(peer.connect(remoteID));
+            //send local media stream to remoteID with audio
             getUserMedia({video: true, audio: true}, function(stream) {
-            var call = peer.call(user2ID, stream);
+            var call = peer.call(remoteID, stream);
+            //once we receive the remote user stream we assign it to video container
             call.on('stream', function(remoteStream) {
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
@@ -40,10 +38,12 @@ const Chatroom = ( {socket} ) => {
             })
 
         }   )
-
+        
+        //When we are assigned a peer id this event is triggered
         peer.on("open", (id)=> {
             setLocalID(id)
             //check local cache
+            
             let userID = localStorage.getItem('userID');
             console.log(`user ID from local storage ${userID}`)
             socket.emit("peerID", {
@@ -52,6 +52,18 @@ const Chatroom = ( {socket} ) => {
             })
         });  
         
+        //Local receives data signal from remote
+        peer.on('connection', (conn)=> {
+            conn.on('data', (data)=> {
+                //socket event to tell server to switch this person to active single room
+                if(data === 'leave') {
+                    userID = localStorage.getItem('userID');
+                    socket.emit('remote left', {userID: userID});  
+                }
+                
+            });
+        })
+
         socket.on('newUID', (userID)=> {
             //generated using uuv4
             console.log(`[LOCAL STORAGE RECEIVED]: ${userID.newUID}`)
@@ -109,6 +121,10 @@ const Chatroom = ( {socket} ) => {
                     <div class="flex justify-center">
                         <Link class="h-fit" to='/' onClick={()=> {
                                 localUserVideoRef.current.stop();
+                                if(dataConn != null) {
+                                    dataConn.send('leave')
+                                    dataConn.close(); 
+                                } 
                             }} >
                             <button class="btn-leave">Leave</button>
                         </Link>
