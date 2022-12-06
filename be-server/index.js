@@ -94,6 +94,7 @@ async function checkIfUserInWaitingRoom(userID) {
 }
 
 async function addUserToActiveSingles(userID) {
+    console.log("Pushing User into Active Singles list")
     client.rpush('activeSingles', userID);
 }
 
@@ -206,8 +207,10 @@ io.on('connection', (socket) => {
     });
 
     //Add user active singles
-    socket.on('remote left', async (data) => {
+    socket.on('remote leave', async (data) => {
+        console.log("Outside 'remote leave' Lock")
         lock.acquire('app:feature:lock').then(async () => {
+            console.log("Within 'remote leave' Lock")
             await addUserToActiveSingles(data.userID)
             return lock.release();
         }).then(() => {

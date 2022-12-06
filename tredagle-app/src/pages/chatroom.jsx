@@ -127,7 +127,7 @@ const Chatroom = ( {socket} ) => {
             dataConn.on('data',(data)=> {
                 console.log("This is the data:" + data);
                 if(data == 'leave'){
-                    console.log("This is Truely the Leave msg")
+                    console.log("userID = " + localStorage.getItem('userID'))
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
                 }
