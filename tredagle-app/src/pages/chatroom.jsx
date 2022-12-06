@@ -139,6 +139,38 @@ const Chatroom = ( {socket} ) => {
         })
     }
 
+    const leaveRoom = (dataConn)=>{
+        console.log("i'm the leave button");
+        dataConn.send('leave');
+        //turn off media stream: video and audio
+        navigator.getUserMedia({audio: false, video: false},
+            function(stream) {
+                    // can also use getAudioTracks() or getVideoTracks()
+                var track = stream.getTracks()[0];  // if only one media track
+                // ...
+                track.stop();
+            },
+            function(error){
+                console.log('getUserMedia() error', error);
+            });
+    }
+
+    const leaveEmptyRoom = ()=>{
+        navigator.getUserMedia({audio: false, video: false},
+            function(stream) {
+                    // can also use getAudioTracks() or getVideoTracks()
+                var track = stream.getTracks()[0];  // if only one media track
+                // ...
+                track.stop();
+            },
+            function(error){
+                console.log('getUserMedia() error', error);
+            });
+
+        //Add to Active Singles list
+        // socket.emit('remote leave');
+    }
+
     return(
         <>
             <div class="flex justify center">
@@ -151,15 +183,8 @@ const Chatroom = ( {socket} ) => {
                 <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
                         <Link class="h-fit" to="/">
-                            {dataConn && <button class="btn-leave" onClick={()=>{
-                                console.log("i'm the leave button");
-                                dataConn.send('leave');
-                                localUserVideoRef.current.srcObject.getVideoTracks()[0].stop();
-                            }}>Leave</button>}
-                            {(dataConn==null) && <button class="btn-leave" onClick={()=>{
-                                console.log("i'm the leave button #2")
-                                localUserVideoRef.current.srcObject.getVideoTracks()[0].stop();
-                            }}>Leave</button>}
+                            {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
+                            {(dataConn==null) && <button class="btn-leave" onClick={leaveEmptyRoom}>Leave</button>}
                         </Link>
                     </div>
                     <div class="flex justify-around">
