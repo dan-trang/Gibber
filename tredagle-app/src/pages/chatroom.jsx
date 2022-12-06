@@ -8,19 +8,20 @@ import { Peer } from 'peerjs'
 const Chatroom = ( {socket} ) => {
     const localUserVideoRef = useRef();
     const remoteUserVideoRef = useRef();
-    //Ref for button and make event listener for click event
-    const buttonRef = useRef();
+    const leaveButton = useRef();
     let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
     let [dataConn, setDataConn] = useState(null);
+    let [peerState, setPeer] = useState(null);
     //let [userID, setUserID] = useState("");
 
     useEffect(()=> {
         var peer = new Peer();
-        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
-        
+        setPeer(peer);
 
-        /* LOCAL HOST */
+        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
+
+        /*                 LOCAL HOST                   */
         //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
@@ -46,7 +47,6 @@ const Chatroom = ( {socket} ) => {
         }   )
         
         //When we are assigned a peer id this event is triggered
-        
         peer.on("open", (id)=> {
             setLocalID(id)
             //check local cache
@@ -64,23 +64,20 @@ const Chatroom = ( {socket} ) => {
         })
 
 
-        /*  End HOST    */
-
-        /*  REMOTE GUEST    */
+        /*                    REMOTE GUEST                    */
         //Local receives data signal from remote
         peer.on('connection', (conn)=> {
             console.log("CONNECTION");
             setDataConn(conn);
-            conn.on('data', (data)=> {
-                //socket event to tell server to switch this person to active single room
-                console.log("PEER RECEIVED DATA EVENT");
-                if(data === 'leave') {
-                    console.log("PEER RECEIVED LEAVE EVENT");
-                    userID = localStorage.getItem('userID');
-                    socket.emit('remote left', {userID: userID});  
-                }
-                
-            });
+            // conn.on('data', (data)=> {
+            //     //socket event to tell server to switch this person to active single room
+            //     console.log("PEER RECEIVED DATA EVENT");
+            //     if(data === 'leave') {
+            //         console.log("PEER RECEIVED LEAVE EVENT");
+            //         userID = localStorage.getItem('userID');
+            //         socket.emit('remote left', {userID: userID});  
+            //     }
+            // });
         })
         peer.on('call', function(call) {
             getUserMedia({video: true, audio: true}, function(stream) {
@@ -94,8 +91,8 @@ const Chatroom = ( {socket} ) => {
             });
         });
 
-        /* END REMOTE GUEST */
-        /*  SHARED  */
+
+        /*                           SHARED                      */
         socket.on('newUID', (userID)=> {
             //generated using uuv4
             console.log(`[LOCAL STORAGE RECEIVED]: ${userID.newUID}`)
@@ -118,19 +115,34 @@ const Chatroom = ( {socket} ) => {
         }
 
     }, []);
-    
+
+    ////// OUTSIDE useEffect loads every time state changes /////////    
     if(dataConn != null) {
-        buttonRef.current.actions.onClick(()=> {
+        console.log("Sending leave signal from leaveButton click")
+        leaveButton.current.actions.onClick(()=> {
             dataConn.send('leave');
         })
+
+        //if Successful data connection established between two Users
         dataConn.on('open', ()=> {
             console.log("Successsfully triggered open event");
+
+            //if current User receives data
             dataConn.on('data',(data)=> {
                 console.log("This is the data:" + data);
             });
+
+            //if current User terminates the call by 'Leave' or closing browser
+            dataConn.on('close', () => {
+                console.log("Closing your connection...");
+                peerState.destroy();
+            })
         })
     }
-    
+    else{
+        console.log("Leaving solo room. Closing empty room...");
+
+    }
 
     return(
         <>
@@ -144,16 +156,7 @@ const Chatroom = ( {socket} ) => {
                 <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
                         {/* <Link class="h-fit">   */}
-                            <button onClick={()=> {
-                                console.log("local user video ref: " + localUserVideoRef.current)
-                                // localUserVideoRef.current.stop();
-                                console.log(`dataConn value before null check: ${dataConn}`);
-                                if(dataConn != null) {
-                                    console.log("dataConn is: " + dataConn)
-                                    dataConn.send('leave')
-                                    dataConn.close(); 
-                                } 
-                            }} class="btn-leave">Leave</button>
+                            <button ref={leaveButton} class="btn-leave">Leave</button>
                         {/* </Link> */}
                     </div>
                     <div class="flex justify-around">
