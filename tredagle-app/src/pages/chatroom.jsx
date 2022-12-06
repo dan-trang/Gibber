@@ -118,8 +118,8 @@ const Chatroom = ( {socket} ) => {
 
     ////// OUTSIDE useEffect loads every time state changes /////////    
     if(dataConn != null) {
-        console.log("Sending leave signal from leaveButton click")
         leaveButton.current.actions.onClick(()=> {
+            console.log("Sending leave signal from leaveButton click")
             dataConn.send('leave');
         })
 
@@ -152,7 +152,10 @@ const Chatroom = ( {socket} ) => {
                 <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
                         {/* <Link class="h-fit">   */}
-                            <button ref={leaveButton} class="btn-leave">Leave</button>
+                            {dataConn && <button ref={leaveButton} class="btn-leave">Leave</button>}
+                            {(dataConn==null) && <button class="btn-leave" onClick={()=>{
+                                console.log("i'm the leave button clicked")
+                            }}>Leave</button>}
                         {/* </Link> */}
                     </div>
                     <div class="flex justify-around">
