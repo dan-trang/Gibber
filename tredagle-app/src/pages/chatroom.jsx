@@ -41,13 +41,14 @@ const Chatroom = ( {socket} ) => {
             })
     
         }   )
-        
-        dataConn.on('open', ()=> {
-            console.log("Successsfully triggered open event");
-            dataConn.on('data',(data)=> {
-                console.log("This is the data:" + data);
-            });
-        })
+        if(dataConn != null) {
+            dataConn.on('open', ()=> {
+                console.log("Successsfully triggered open event");
+                dataConn.on('data',(data)=> {
+                    console.log("This is the data:" + data);
+                });
+            })
+        }
         //When we are assigned a peer id this event is triggered
         
         peer.on("open", (id)=> {
