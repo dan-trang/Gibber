@@ -139,10 +139,6 @@ const Chatroom = ( {socket} ) => {
             })
         })
     }
-    else{
-        console.log("Leaving solo room. Closing empty room...");
-
-    }
 
     return(
         <>
