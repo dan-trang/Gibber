@@ -52,6 +52,9 @@ const Chatroom = ( {socket} ) => {
             })
         });  
         
+        peer.on('error', (err)=> {
+            console.log(`PEER ERROR EVENT: ${err}`)
+        })
         //Local receives data signal from remote
         peer.on('connection', (conn)=> {
             console.log("CONNECTION");
