@@ -15,7 +15,6 @@ const Chatroom = ( {socket} ) => {
     let [localID, setLocalID ] = useState("");
     let [dataConn, setDataConn] = useState(null);
     let [peerState, setPeer] = useState(null);
-    let [callEnded, setCallEnded] = useState(false);
     //let [userID, setUserID] = useState("");
 
     useEffect(()=> {
@@ -26,9 +25,9 @@ const Chatroom = ( {socket} ) => {
         /*                 LOCAL HOST                   */
         //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
+            remoteUserVideoRef.current.className = 'vidsDisplay';
             console.log("RemoteID sent")
             var remoteID = data.remote;
-            setCallEnded(false);
             console.log('user2 peerID:' + remoteID);
             setRemoteID(remoteID);
             //Set remote data connection to dataConn state
@@ -83,10 +82,10 @@ const Chatroom = ( {socket} ) => {
             // });
         })
         peer.on('call', function(call) {
-            setCallEnded(false);
             getUserMedia({video: true, audio: true}, function(stream) {
             call.answer(stream); // Answer the call with an A/V stream.
             call.on('stream', function(remoteStream) {
+                remoteUserVideoRef.current.className = 'vidsDisplay';
                 remoteUserVideoRef.current.srcObject = remoteStream;
                 remoteUserVideoRef.current.play();
             });
@@ -132,10 +131,10 @@ const Chatroom = ( {socket} ) => {
                 console.log("This is the data:" + data);
                 if(data == 'leave'){
                     console.log("userID = " + localStorage.getItem('userID'))
+                    remoteUserVideoRef.current.className = 'vidsGone';
                     // remoteUserVideoRef.current.pause();
                     // remoteUserVideoRef.current.removeAttribute('src');
                     // remoteUserVideoRef.current.load();
-                    setCallEnded(true);
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
                     //set remote peer to null, disconnect dataConnection
@@ -173,8 +172,7 @@ const Chatroom = ( {socket} ) => {
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
                 <video className="vids" id="LOCAL" ref={localUserVideoRef}></video>
-                {!callEnded && <video className="vids" ref={remoteUserVideoRef}></video> }
-                {callEnded && <video className="vids"></video>}
+                <video className="vids" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
                         <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peer.destroy()}}>
                             {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}

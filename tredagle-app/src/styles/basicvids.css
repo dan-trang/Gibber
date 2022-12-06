@@ -1,4 +1,10 @@
-.vids {
+.vidsGone {
+    max-height: 480px;
+    max-width: 640px;
+    display: none;
+}
+
+.vidsDisplay {
     max-height: 480px;
     max-width: 640px;
 }
