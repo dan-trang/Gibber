@@ -8,6 +8,8 @@ import { Peer } from 'peerjs'
 const Chatroom = ( {socket} ) => {
     const localUserVideoRef = useRef();
     const remoteUserVideoRef = useRef();
+    //Ref for button and make event listener for click event
+    const buttonRef = useRef();
     let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
     let [dataConn, setDataConn] = useState(null);
@@ -16,7 +18,8 @@ const Chatroom = ( {socket} ) => {
     useEffect(()=> {
         var peer = new Peer();
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
-    
+        
+
         /* LOCAL HOST */
         //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
@@ -117,6 +120,9 @@ const Chatroom = ( {socket} ) => {
     }, []);
     
     if(dataConn != null) {
+        buttonRef.current.actions.onClick(()=> {
+            dataConn.send('leave');
+        })
         dataConn.on('open', ()=> {
             console.log("Successsfully triggered open event");
             dataConn.on('data',(data)=> {
