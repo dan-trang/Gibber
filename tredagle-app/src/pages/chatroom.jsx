@@ -28,6 +28,7 @@ const Chatroom = ( {socket} ) => {
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
             var remoteID = data.remote;
+            setCallEnded(false);
             console.log('user2 peerID:' + remoteID);
             setRemoteID(remoteID);
             //Set remote data connection to dataConn state
@@ -82,6 +83,7 @@ const Chatroom = ( {socket} ) => {
             // });
         })
         peer.on('call', function(call) {
+            setCallEnded(false);
             getUserMedia({video: true, audio: true}, function(stream) {
             call.answer(stream); // Answer the call with an A/V stream.
             call.on('stream', function(remoteStream) {
@@ -134,7 +136,6 @@ const Chatroom = ( {socket} ) => {
                     // remoteUserVideoRef.current.removeAttribute('src');
                     // remoteUserVideoRef.current.load();
                     setCallEnded(true);
-                    setCallEnded(false);
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
                     //set remote peer to null, disconnect dataConnection
