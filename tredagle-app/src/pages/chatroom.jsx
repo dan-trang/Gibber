@@ -118,10 +118,6 @@ const Chatroom = ( {socket} ) => {
 
     ////// OUTSIDE useEffect loads every time state changes /////////    
     if(dataConn != null) {
-        leaveButton.current.actions.onClick(()=> {
-            console.log("Sending leave signal from leaveButton click")
-            dataConn.send('leave');
-        })
 
         //if Successful data connection established between two Users
         dataConn.on('open', ()=> {
