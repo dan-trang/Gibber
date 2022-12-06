@@ -143,29 +143,16 @@ const Chatroom = ( {socket} ) => {
         console.log("i'm the leave button");
         dataConn.send('leave');
         //turn off media stream: video and audio
-        navigator.getUserMedia({audio: false, video: true},
-            function(stream) {
-                    // can also use getAudioTracks() or getVideoTracks()
-                var track = stream.getTracks()[0];  // if only one media track
-                // ...
-                track.stop();
-            },
-            function(error){
-                console.log('getUserMedia() error', error);
-            });
+        localUserVideoRef.current.pause();
+        localUserVideoRef.current.srcObject = null;
+        localUserVideoRef.current.play();
     }
 
     const leaveEmptyRoom = ()=>{
-        navigator.getUserMedia({audio: false, video: true},
-            function(stream) {
-                    // can also use getAudioTracks() or getVideoTracks()
-                var track = stream.getTracks()[0];  // if only one media track
-                // ...
-                track.stop();
-            },
-            function(error){
-                console.log('getUserMedia() error', error);
-            });
+        console.log("coming at you from an EMPTY room")
+        localUserVideoRef.current.pause();
+        localUserVideoRef.current.srcObject = null;
+        localUserVideoRef.current.play();
 
         //Add to Active Singles list
         // socket.emit('remote leave');
