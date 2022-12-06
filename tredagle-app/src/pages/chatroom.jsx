@@ -4,7 +4,7 @@ import bg_chatroom from "../assets/gradient-1.jpg"
 import { Link } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 import { Peer } from 'peerjs'
-import '../styles/basicVids.css'
+import '../styles/basicvids.css'
 var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 const Chatroom = ( {socket} ) => {
