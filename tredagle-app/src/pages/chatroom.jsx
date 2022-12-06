@@ -169,7 +169,7 @@ const Chatroom = ( {socket} ) => {
                 <video id="LOCAL" ref={localUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                 <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
-                        <Link class="h-fit" to="/" onClick={localUserVideoRef.current.stop()}>
+                        <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop()}}>
                             {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
                             {(dataConn==null) && <button class="btn-leave" onClick={leaveEmptyRoom}>Leave</button>}
                         </Link>
