@@ -17,7 +17,7 @@ const Chatroom = ( {socket} ) => {
         var peer = new Peer();
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
     
-        /* HOST */
+        /* LOCAL HOST */
         //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
@@ -42,6 +42,12 @@ const Chatroom = ( {socket} ) => {
     
         }   )
         
+        dataConn.on('open', ()=> {
+            console.log("Successsfully triggered open event");
+            dataConn.on('data',(data)=> {
+                console.log("This is the data:" + data);
+            });
+        })
         //When we are assigned a peer id this event is triggered
         
         peer.on("open", (id)=> {
@@ -59,6 +65,8 @@ const Chatroom = ( {socket} ) => {
         peer.on('error', (err)=> {
             console.log(`PEER ERROR EVENT: ${err}`)
         })
+
+
         /*  End HOST    */
 
         /*  REMOTE GUEST    */
