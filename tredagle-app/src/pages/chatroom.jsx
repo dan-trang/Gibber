@@ -17,6 +17,7 @@ const Chatroom = ( {socket} ) => {
         var peer = new Peer();
         var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
     
+        /* HOST */
         //Receive remoteID from socket.io server 
         socket.on("remoteID", (data) => {
             console.log("RemoteID sent")
@@ -38,10 +39,11 @@ const Chatroom = ( {socket} ) => {
             }, function(err) {
                 console.log('Failed to get local stream' ,err);
             })
-
+    
         }   )
         
         //When we are assigned a peer id this event is triggered
+        
         peer.on("open", (id)=> {
             setLocalID(id)
             //check local cache
@@ -57,9 +59,13 @@ const Chatroom = ( {socket} ) => {
         peer.on('error', (err)=> {
             console.log(`PEER ERROR EVENT: ${err}`)
         })
+        /*  End HOST    */
+
+        /*  REMOTE GUEST    */
         //Local receives data signal from remote
         peer.on('connection', (conn)=> {
             console.log("CONNECTION");
+            setDataConn(conn);
             conn.on('data', (data)=> {
                 //socket event to tell server to switch this person to active single room
                 console.log("PEER RECEIVED DATA EVENT");
@@ -71,7 +77,20 @@ const Chatroom = ( {socket} ) => {
                 
             });
         })
+        peer.on('call', function(call) {
+            getUserMedia({video: true, audio: true}, function(stream) {
+            call.answer(stream); // Answer the call with an A/V stream.
+            call.on('stream', function(remoteStream) {
+                remoteUserVideoRef.current.srcObject = remoteStream;
+                remoteUserVideoRef.current.play();
+            });
+            }, function(err) {
+            console.log('Failed to get local stream' ,err);
+            });
+        });
 
+        /* END REMOTE GUEST */
+        /*  SHARED  */
         socket.on('newUID', (userID)=> {
             //generated using uuv4
             console.log(`[LOCAL STORAGE RECEIVED]: ${userID.newUID}`)
@@ -85,26 +104,7 @@ const Chatroom = ( {socket} ) => {
             localUserVideoRef.current.srcObject = stream;
             localUserVideoRef.current.play();
         });
-        
-        peer.on('call', function(call) {
-            getUserMedia({video: true, audio: true}, function(stream) {
-              call.answer(stream); // Answer the call with an A/V stream.
-              call.on('stream', function(remoteStream) {
-                  remoteUserVideoRef.current.srcObject = remoteStream;
-                  remoteUserVideoRef.current.play();
-              });
-            }, function(err) {
-              console.log('Failed to get local stream' ,err);
-            });
-        });
-        // peer.on('call', (call) => {
-        //     console.log("CALL WAS RECEIVED BY PEER2")
-        //     call.answer(localUserVideoRef.current.srcObject);
-        //     call.on('stream', (remoteStream)=> {
-        //         remoteUserVideoRef.current.srcObject= remoteStream;
-        //         localUserVideoRef.current.play();
-        //     })
-        // })
+        /*  END SHARED  */
         
         return () => {
             socket.off("remoteID");
