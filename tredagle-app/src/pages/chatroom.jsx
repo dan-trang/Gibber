@@ -128,7 +128,8 @@ const Chatroom = ( {socket} ) => {
                     <div class="flex justify-center">
                         {/* <Link class="h-fit">   */}
                             <button onClick={()=> {
-                                localUserVideoRef.current.stop();
+                                console.log("local user video ref: " + localUserVideoRef.current)
+                                // localUserVideoRef.current.stop();
                                 console.log(`dataConn value before null check: ${dataConn}`);
                                 if(dataConn != null) {
                                     console.log("dataConn is: " + dataConn)
