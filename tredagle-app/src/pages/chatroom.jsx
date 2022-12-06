@@ -25,6 +25,7 @@ const Chatroom = ( {socket} ) => {
             setRemoteID(remoteID);
             //Set remote data connection to dataConn state
             let conn = peer.connect(remoteID);
+            console.log("conn is " + conn)
             setDataConn(conn);
             //send local media stream to remoteID with audio
             getUserMedia({video: true, audio: true}, function(stream) {
