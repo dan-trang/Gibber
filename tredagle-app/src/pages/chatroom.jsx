@@ -148,9 +148,12 @@ const Chatroom = ( {socket} ) => {
                 <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
                         {/* <Link class="h-fit">   */}
-                            {dataConn && <button ref={leaveButton} class="btn-leave">Leave</button>}
+                            {dataConn && <button class="btn-leave" onClick={()=>{
+                                console.log("i'm the leave button");
+                                dataConn.send('leave');
+                            }}>Leave</button>}
                             {(dataConn==null) && <button class="btn-skip" onClick={()=>{
-                                console.log("i'm the leave button clicked")
+                                console.log("i'm the FAKE leave button HAHAH")
                             }}>Leave</button>}
                         {/* </Link> */}
                     </div>
