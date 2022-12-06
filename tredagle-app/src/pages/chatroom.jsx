@@ -8,8 +8,8 @@ import '../styles/basicvids.css'
 var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 const Chatroom = ( {socket} ) => {
-    const localUserVideoRef = useRef();
-    const remoteUserVideoRef = useRef();
+    const localUserVideoRef = useRef(null);
+    const remoteUserVideoRef = useRef(null);
     const leaveButton = useRef();
     let [remoteID, setRemoteID ] = useState("");
     let [localID, setLocalID ] = useState("");
@@ -168,6 +168,15 @@ const Chatroom = ( {socket} ) => {
         // socket.emit('remote leave');
     }
 
+    //need if,else conditional to affect <video/> class to "video-box-false"
+    if(remoteUserVideoRef!=null){
+        if(renderVideo==false){
+            remoteUserVideoRef.current.className("video-box-false")
+        }
+        else{
+            remoteUserVideoRef.current.className("video-box-true")
+        }
+    }
     return(
         <>
             <div class="flex justify center">
@@ -177,7 +186,7 @@ const Chatroom = ( {socket} ) => {
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
                 <video class="video-box-true" id="localVideo" ref={localUserVideoRef}></video>
-                <video class="video-box-false" id="remoteVideo" ref={remoteUserVideoRef}></video>
+                <video class="video-box-true" id="remoteVideo" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
                         {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
                             <button class="btn-leave">Leave</button>
