@@ -207,7 +207,7 @@ io.on('connection', (socket) => {
     });
 
     //Add user active singles
-    socket.on('remote leave', async (data) => {
+    socket.on('remote leave', (data) => {
         console.log("Outside 'remote leave' Lock")
         lock.acquire('app:feature:lock').then(async () => {
             console.log("Within 'remote leave' Lock")

@@ -130,6 +130,7 @@ const Chatroom = ( {socket} ) => {
                     console.log("userID = " + localStorage.getItem('userID'))
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
+                    //set remote peer to null, disconnect dataConnection
                 }
             });
 
@@ -149,15 +150,17 @@ const Chatroom = ( {socket} ) => {
                 <video id="LOCAL" ref={localUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                 <video ref={remoteUserVideoRef} class="w-full h-full bg-black border-2 border-stone-900"></video>
                     <div class="flex justify-center">
-                        {/* <Link class="h-fit">   */}
+                        <Link class="h-fit" to="/">
                             {dataConn && <button class="btn-leave" onClick={()=>{
                                 console.log("i'm the leave button");
                                 dataConn.send('leave');
+                                mediaConnection.close();
                             }}>Leave</button>}
-                            {(dataConn==null) && <button class="btn-skip" onClick={()=>{
-                                console.log("i'm the FAKE leave button HAHAH")
+                            {(dataConn==null) && <button class="btn-leave" onClick={()=>{
+                                console.log("i'm the leave button #2")
+                                mediaConnection.close();
                             }}>Leave</button>}
-                        {/* </Link> */}
+                        </Link>
                     </div>
                     <div class="flex justify-around">
                         <div>
