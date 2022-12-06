@@ -54,9 +54,12 @@ const Chatroom = ( {socket} ) => {
         
         //Local receives data signal from remote
         peer.on('connection', (conn)=> {
+            console.log("CONNECTION");
             conn.on('data', (data)=> {
                 //socket event to tell server to switch this person to active single room
+                console.log("PEER RECEIVED DATA EVENT");
                 if(data === 'leave') {
+                    console.log("PEER RECEIVED LEAVE EVENT");
                     userID = localStorage.getItem('userID');
                     socket.emit('remote left', {userID: userID});  
                 }
