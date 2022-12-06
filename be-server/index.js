@@ -31,7 +31,7 @@ const LockAcquisitionError = lock.LockAcquisitionError;
 const LockReleaseError = lock.LockReleaseError;
 
 const port = process.env.PORT || 3007;
-
+console.log("Heroku Port is: " + port);
 //app.unsubscribe(logger('dev'));
 app.use(cors({
     origin: "*"
