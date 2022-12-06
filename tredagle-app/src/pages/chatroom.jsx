@@ -149,7 +149,7 @@ const Chatroom = ( {socket} ) => {
                     <div class="flex justify-center">
                         {/* <Link class="h-fit">   */}
                             {dataConn && <button ref={leaveButton} class="btn-leave">Leave</button>}
-                            {(dataConn==null) && <button class="btn-leave" onClick={()=>{
+                            {(dataConn==null) && <button class="btn-skip" onClick={()=>{
                                 console.log("i'm the leave button clicked")
                             }}>Leave</button>}
                         {/* </Link> */}
