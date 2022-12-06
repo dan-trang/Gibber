@@ -154,11 +154,11 @@ const Chatroom = ( {socket} ) => {
                             {dataConn && <button class="btn-leave" onClick={()=>{
                                 console.log("i'm the leave button");
                                 dataConn.send('leave');
-                                localUserVideoRef.current.stop();
+                                localVideoRef.current.srcObject.getVideoTracks()[0].stop();
                             }}>Leave</button>}
                             {(dataConn==null) && <button class="btn-leave" onClick={()=>{
                                 console.log("i'm the leave button #2")
-                                localUserVideoRef.current.stop();
+                                localVideoRef.current.srcObject.getVideoTracks()[0].stop();
                             }}>Leave</button>}
                         </Link>
                     </div>
