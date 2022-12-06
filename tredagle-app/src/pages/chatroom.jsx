@@ -4,6 +4,8 @@ import bg_chatroom from "../assets/gradient-1.jpg"
 import { Link } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 import { Peer } from 'peerjs'
+import '../styles/basicVids.css'
+var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 const Chatroom = ( {socket} ) => {
     const localUserVideoRef = useRef();
@@ -19,7 +21,7 @@ const Chatroom = ( {socket} ) => {
         var peer = new Peer();
         setPeer(peer);
 
-        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
+        //var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;  
 
         /*                 LOCAL HOST                   */
         //Receive remoteID from socket.io server 
@@ -129,8 +131,8 @@ const Chatroom = ( {socket} ) => {
                 if(data == 'leave'){
                     console.log("userID = " + localStorage.getItem('userID'))
                     remoteUserVideoRef.current.pause();
-                    remoteUserVideoRef.current.srcObject = null;
-                    remoteUserVideoRef.current.play();
+                    remoteUserVideoRef.current.removeAttribute('src');
+                    remoteUserVideoRef.current.load();
                     //put me into active singles here
                     socket.emit('remote leave', {userId: localStorage.getItem('userID')})
                     //set remote peer to null, disconnect dataConnection
@@ -153,9 +155,7 @@ const Chatroom = ( {socket} ) => {
 
     const leaveEmptyRoom = ()=>{
         console.log("coming at you from an EMPTY room")
-        localUserVideoRef.current.pause();
-        localUserVideoRef.current.srcObject = null;
-        localUserVideoRef.current.play();
+        getUserM
 
         //Add to Active Singles list
         // socket.emit('remote leave');
@@ -169,8 +169,8 @@ const Chatroom = ( {socket} ) => {
                 </div>
                 <img class="object-cover w-screen h-screen" src={bg_chatroom} />
                 <div class="fixed grid grid-cols-2 top-1/4 inset-x-0 mx-auto w-[50rem] h-[18rem] lg:w-[90rem] lg:h-[28rem] gap-x-4 gap-y-1 lg:gap-x-12 lg:gap-y-2">
-                <video id="LOCAL" ref={localUserVideoRef}></video>
-                <video ref={remoteUserVideoRef}></video>
+                <video className="vids" id="LOCAL" ref={localUserVideoRef}></video>
+                <video className="vids" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
                         <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peer.destroy()}}>
                             {dataConn && <button class="btn-leave" onClick={leaveRoom}>Leave</button>}
