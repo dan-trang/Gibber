@@ -168,15 +168,16 @@ const Chatroom = ( {socket} ) => {
         // socket.emit('remote leave');
     }
 
-    //need if,else conditional to affect <video/> class to "video-box-false"
-    // if(remoteUserVideoRef!=null){
-    //     if(renderVideo==false){
-    //         remoteUserVideoRef.current.className("video-box-false")
-    //     }
-    //     else{
-    //         remoteUserVideoRef.current.className("video-box-true")
-    //     }
-    // }
+    // need if,else conditional to affect <video/> class to "video-box-false"
+    if(remoteUserVideoRef!=null){
+        console.log("This is remote user videoRef: " + remoteUserVideoRef)
+        if(renderVideo==false){
+            remoteUserVideoRef.current.className("video-box-false")
+        }
+        else{
+            remoteUserVideoRef.current.className("video-box-true")
+        }
+    }
     return(
         <>
             <div class="flex justify center">
