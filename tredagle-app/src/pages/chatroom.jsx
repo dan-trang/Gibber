@@ -172,10 +172,10 @@ const Chatroom = ( {socket} ) => {
     useEffect(()=> {
         console.log("This is remote user videoRef: " + remoteUserVideoRef)
         if(renderVideo==false){
-            remoteUserVideoRef.current.className("video-box-false")
+            remoteUserVideoRef.current.className = "video-box-false";
         }
         else{
-            remoteUserVideoRef.current.className("video-box-true")
+            remoteUserVideoRef.current.className = "video-box-true";
         }                                                                                                                        
     }, [renderVideo])
         
