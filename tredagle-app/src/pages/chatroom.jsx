@@ -169,7 +169,8 @@ const Chatroom = ( {socket} ) => {
     }
 
     // need if,else conditional to affect <video/> class to "video-box-false"
-    if(remoteUserVideoRef!=null){
+    console.log(`The value of remoteuserVideoRef outside if: ${remoteUserVideoRef.current}`);
+    if(remoteUserVideoRef.current!=null){
         console.log("This is remote user videoRef: " + remoteUserVideoRef)
         if(renderVideo==false){
             remoteUserVideoRef.current.className("video-box-false")
