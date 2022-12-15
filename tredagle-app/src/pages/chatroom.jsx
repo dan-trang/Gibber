@@ -31,8 +31,10 @@ const Chatroom = ( {socket} ) => {
             setRemoteID(remoteID);
             //Set remote data connection to dataConn state
             let conn = peer.connect(remoteID);
-            console.log("conn is " + conn.id)
+            console.log("conn is " + conn);
             setDataConn(conn);
+            console.log("conn is after set " + conn);
+            console.log(`dataConn is ${dataConn}`)
             //send local media stream to remoteID with audio
             getUserMedia({video: true, audio: true}, function(stream) {
             var call = peer.call(remoteID, stream);
@@ -68,10 +70,11 @@ const Chatroom = ( {socket} ) => {
 
 
         /*                    REMOTE GUEST                    */
-        //Local receives data signal from remote
+        //Remote recieves data connection signal from host
         peer.on('connection', (conn)=> {
-            console.log("CONNECTION");
+            
             setDataConn(conn);
+            console.log("CONN is: " + conn);
             // conn.on('data', (data)=> {
             //     //socket event to tell server to switch this person to active single room
             //     console.log("PEER RECEIVED DATA EVENT");
@@ -158,10 +161,14 @@ const Chatroom = ( {socket} ) => {
     const leaveRoom = (dataConn)=>{
         console.log("Leaving the call...");
         dataConn.send('leave');
+        localUserVideoRef.current.stop(); 
+        dataConn.send('leave'); 
+        console.log("leave was maybe sent"); 
+        peerState.destroy()
         //turn off media stream: video and audio
-        localUserVideoRef.current.pause();
-        localUserVideoRef.current.srcObject = null;
-        localUserVideoRef.current.play();
+        // localUserVideoRef.current.pause();
+        // localUserVideoRef.current.srcObject = null;
+        // localUserVideoRef.current.play();
     }
 
     const leaveEmptyRoom = ()=>{
@@ -194,7 +201,7 @@ const Chatroom = ( {socket} ) => {
                 <video class="video-box-true" id="localVideo" ref={localUserVideoRef}></video>
                 <video class="video-box-true" id="remoteVideo" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
-                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); dataConn.send('leave'); console.log("leave was maybe sent"); peerState.destroy()}}>
+                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{leaveRoom(dataConn)}}>
                             <button class="btn-leave">Leave</button>
                         </Link>}
                         {dataConn==null && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); console.log("dataConn is null"); peerState.destroy()}}>
