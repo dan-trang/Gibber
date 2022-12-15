@@ -31,7 +31,7 @@ const Chatroom = ( {socket} ) => {
             setRemoteID(remoteID);
             //Set remote data connection to dataConn state
             let conn = peer.connect(remoteID);
-            console.log("conn is " + conn)
+            console.log("conn is " + conn.id)
             setDataConn(conn);
             //send local media stream to remoteID with audio
             getUserMedia({video: true, audio: true}, function(stream) {
@@ -191,10 +191,10 @@ const Chatroom = ( {socket} ) => {
                 <video class="video-box-true" id="localVideo" ref={localUserVideoRef}></video>
                 <video class="video-box-true" id="remoteVideo" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
-                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); dataConn.send('leave'); peerState.destroy()}}>
+                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); dataConn.send('leave'); console.log("leave was maybe sent"); peerState.destroy()}}>
                             <button class="btn-leave">Leave</button>
                         </Link>}
-                        {dataConn==null && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
+                        {dataConn==null && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); console.log("dataConn is null"); peerState.destroy()}}>
                             <button class="btn-leave">Leave</button>
                         </Link>}
                     </div>
