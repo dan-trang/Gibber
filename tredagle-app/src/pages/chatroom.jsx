@@ -191,7 +191,7 @@ const Chatroom = ( {socket} ) => {
                 <video class="video-box-true" id="localVideo" ref={localUserVideoRef}></video>
                 <video class="video-box-true" id="remoteVideo" ref={remoteUserVideoRef}></video>
                     <div class="flex justify-center">
-                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
+                        {dataConn && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); dataConn.send('leave'); peerState.destroy()}}>
                             <button class="btn-leave">Leave</button>
                         </Link>}
                         {dataConn==null && <Link class="h-fit" to="/" onClick={()=>{localUserVideoRef.current.stop(); peerState.destroy()}}>
