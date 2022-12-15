@@ -122,8 +122,8 @@ const Chatroom = ( {socket} ) => {
 
     }, []);
 
-    ////// OUTSIDE useEffect loads every time state changes /////////    
-    if(dataConn != null) {
+    useEffect(()=> {
+        if(dataConn != null) {
 
         //if Successful data connection established between two Users
         dataConn.on('open', ()=> {
@@ -151,6 +151,9 @@ const Chatroom = ( {socket} ) => {
             //turn off media stream
         })
     }
+    }, [dataConn])
+    ////// OUTSIDE useEffect loads every time state changes /////////    
+    
 
     const leaveRoom = (dataConn)=>{
         console.log("Leaving the call...");
