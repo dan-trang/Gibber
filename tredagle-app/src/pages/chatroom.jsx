@@ -135,12 +135,12 @@ const Chatroom = ( {socket} ) => {
             //if current User receives data
             dataConn.on('data',(data)=> {
                 console.log("This is the data:" + data);
-                if(data == 'leave'){
+                if(data.msg == 'leave'){
 
                     //turn OFF remote user's video box
                     setRenderVideo(false);
 
-                    console.log("userID = " + localStorage.getItem('userID'))
+                    console.log("userID = " + data.remoteID);
                     // remoteUserVideoRef.current.pause();
                     // remoteUserVideoRef.current.removeAttribute('src');
                     // remoteUserVideoRef.current.load();
@@ -162,7 +162,7 @@ const Chatroom = ( {socket} ) => {
         console.log("Leaving the call...");
         dataConn.send('leave');
         localUserVideoRef.current.stop(); 
-        dataConn.send('leave'); 
+        dataConn.send({'msg': 'leave', 'remoteID': localStorage.getItem('userID')}); 
         console.log("leave was maybe sent"); 
         peerState.destroy()
         //turn off media stream: video and audio
