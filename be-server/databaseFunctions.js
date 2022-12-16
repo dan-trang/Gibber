@@ -45,7 +45,7 @@ async function addUserToActiveSingles(userID) {
     client.rpush('activeSingles', userID);
 }
 
-export default {
+module.exports = {
     addUserToDB,
     checkForUser,
     checkIfUserInWaitingRoom,
