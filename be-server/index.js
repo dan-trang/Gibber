@@ -215,6 +215,6 @@ client.hget(testHashKey, 'peerID', (err, res) => {
     }
 })
 
-addUserToDB("John.Doe", "0987654321")
+//addUserToDB(client,"John.Doe", "0987654321")
 ////////////////////////////////////////////
 
