@@ -160,7 +160,6 @@ const Chatroom = ( {socket} ) => {
 
     const leaveRoom = (dataConn)=>{
         console.log("Leaving the call...");
-        dataConn.send('leave');
         localUserVideoRef.current.stop(); 
         let payload = {'msg': 'leave', 'remoteID': localStorage.getItem('userID')};
         dataConn.send(payload); 
