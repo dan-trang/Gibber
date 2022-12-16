@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
 
         //check if userID is in the database as a user hash key already...
         var userID;
-        let userInDatabase = await checkForUser(user.userID, user.peerID);
+        let userInDatabase = await checkForUser(client, user.userID, user.peerID);
         if(userInDatabase == 0) console.log("[User no existo in DB]" + userInDatabase)
         if(userInDatabase == 1) console.log("[User Exists in DB]" + userInDatabase)
         if(userInDatabase == 0) {
@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
                 newUID: userID
             })
 
-            await addUserToDB(userID, user.peerID, socket.id);
+            await addUserToDB(client, userID, user.peerID, socket.id);
             console.log("[Added User to DB]: " + userID + " with peerID = " + user.peerID);
         
 
@@ -109,7 +109,7 @@ io.on('connection', (socket) => {
             console.log("DOES USERID EXIST AT THIS POINT?: " + userID)
 
             //if userID does not yet exist in the waiting room, add then to the room and queue 'er up!
-            let userInWaitingRoom = await checkIfUserInWaitingRoom(userID)
+            let userInWaitingRoom = await checkIfUserInWaitingRoom(client, userID)
             console.log("WHY ARE YOU NOT WORKING " + userInWaitingRoom)
             if(userInWaitingRoom == 0){
                 let room_status = await client.sadd('waitingRoom', userID );
@@ -174,7 +174,7 @@ io.on('connection', (socket) => {
         console.log("Outside 'remote leave' Lock")
         lock.acquire('app:feature:lock').then(async () => {
             console.log("Within 'remote leave' Lock")
-            await addUserToActiveSingles(data.userID)
+            await addUserToActiveSingles(client, data.userID)
             return lock.release();
         }).then(() => {
             // Lock has been released

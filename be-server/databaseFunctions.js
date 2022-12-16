@@ -7,7 +7,7 @@
 *         peerID -- unique but temporary IDs to help socket.io connect two remote peers to webcall
 */
 
-async function addUserToDB(userID, peerID, socketID) { //timestamp param could go here
+async function addUserToDB(client, userID, peerID, socketID) { //timestamp param could go here
     const result = await client.hset(userID, 'peerID', peerID, 'socketID', socketID, 'status', 'waiting', (err, res)=> {
         if(err) console.log(err);
         return res;
@@ -16,7 +16,7 @@ async function addUserToDB(userID, peerID, socketID) { //timestamp param could g
     if(result == 1) console.log("[New User Added] user: " + userID + " / peerID: " + peerID)
 }
 
-async function checkForUser(userID, peerID) {
+async function checkForUser(client, userID, peerID) {
     const alreadyJoined = await client.hexists(`${userID}`,"peerID",(err, res)=> {
         if (err) console.log(err);
         if(res == 0) console.log(`[User DNE in DB] status #: ${res}`)
@@ -30,7 +30,7 @@ async function checkForUser(userID, peerID) {
     return alreadyJoined;
 }
 
-async function checkIfUserInWaitingRoom(userID) {
+async function checkIfUserInWaitingRoom(client, userID) {
     let existInWaitingRoom = client.smismember('waitingRoom', userID, (err, res)=> {
         if(err) console.log(err)
         if(res == 0) console.log(`[User DNE in Waiting Room] status #: ${res}`)
@@ -40,7 +40,7 @@ async function checkIfUserInWaitingRoom(userID) {
     return existInWaitingRoom
 }
 
-async function addUserToActiveSingles(userID) {
+async function addUserToActiveSingles(client, userID) {
     console.log("Pushing User into Active Singles list")
     client.rpush('activeSingles', userID);
 }
