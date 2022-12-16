@@ -160,9 +160,10 @@ const Chatroom = ( {socket} ) => {
 
     const leaveRoom = (dataConn)=>{
         console.log("Leaving the call...");
-        localUserVideoRef.current.stop(); 
         let payload = {'msg': 'leave', 'remoteID': localStorage.getItem('userID')};
-        dataConn.send(payload); 
+        dataConn.send(payload);
+        localUserVideoRef.current.stop(); 
+         
         console.log("leave was maybe sent"); 
         peerState.destroy()
         //turn off media stream: video and audio
