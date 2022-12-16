@@ -17,6 +17,7 @@ const {
 
 require("dotenv").config();
 
+console.log("Check to see if APP can load if repushed");
 //require("dotenv").config();
 //const logger = require("morgan");
 //const joinRouter = require("./routes/join");
