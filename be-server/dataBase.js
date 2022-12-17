@@ -1,6 +1,5 @@
 const Redis = require("ioredis");
 
-
 export default class redisdb {
     constructor() {
         this.client = new Redis({
@@ -15,5 +14,4 @@ export default class redisdb {
         this.waitList = 0;
         this.activeSingles = 0;
     }
-    
 }
