@@ -8,7 +8,7 @@ const Redis = require("ioredis");
 const { v4: uuidv4 } = require('uuid');
 const Origin = "https://capable-toffee-ebaa27.netlify.app";
 //const Origin = "http://127.0.0.1:5173/"
-import databaseFunctions from './databaseFunctions.js';
+const databaseFunctions =  require('./databaseFunctions.js');
 // const {
 //     addUserToDB, 
 //     checkForUser, 
