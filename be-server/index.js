@@ -15,10 +15,11 @@ import { databaseFunctions as database } from './databaseFunctions.js';
 //     checkIfUserInWaitingRoom, 
 //     addUserToActiveSingles
 // } = require('./databaseFunctions.js');
-addUserToDB = database.addUserToDB;
-checkForUser = database.checkForUser;
-checkIfUserInWaitingRoom = database.checkIfUserInWaitingRoom;
-addUserToActiveSingles = database.addUserToActiveSingles;
+var mydb = new database();
+addUserToDB = db.addUserToDB;
+checkForUser = db.checkForUser;
+checkIfUserInWaitingRoom = db.checkIfUserInWaitingRoom;
+addUserToActiveSingles = db.addUserToActiveSingles;
 
 require("dotenv").config();
 
