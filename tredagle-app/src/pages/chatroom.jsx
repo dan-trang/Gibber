@@ -1,5 +1,4 @@
 import NavbarProp from "../components/navbar"
-import VideoBox from "../components/videobox"
 import bg_chatroom from "../assets/gradient-1.jpg"
 import { Link } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
