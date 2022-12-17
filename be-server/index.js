@@ -8,12 +8,17 @@ const Redis = require("ioredis");
 const { v4: uuidv4 } = require('uuid');
 const Origin = "https://capable-toffee-ebaa27.netlify.app";
 //const Origin = "http://127.0.0.1:5173/"
-const {
-    addUserToDB, 
-    checkForUser, 
-    checkIfUserInWaitingRoom, 
-    addUserToActiveSingles
-} = require('./databaseFunctions.js');
+import { databaseFunctions as database } from './databaseFunctions.js';
+// const {
+//     addUserToDB, 
+//     checkForUser, 
+//     checkIfUserInWaitingRoom, 
+//     addUserToActiveSingles
+// } = require('./databaseFunctions.js');
+addUserToDB = database.addUserToDB;
+checkForUser = database.checkForUser;
+checkIfUserInWaitingRoom = database.checkIfUserInWaitingRoom;
+addUserToActiveSingles = database.addUserToActiveSingles;
 
 require("dotenv").config();
 
