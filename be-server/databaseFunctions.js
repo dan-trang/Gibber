@@ -6,7 +6,7 @@
 *         userID -- unique and persistent IDs given to users as they connect with the website
 *         peerID -- unique but temporary IDs to help socket.io connect two remote peers to webcall
 */
-export default class databaseFunctions {
+class databaseFunctions {
     async addUserToDB(client, userID, peerID, socketID) { //timestamp param could go here
         const result = await client.hset(userID, 'peerID', peerID, 'socketID', socketID, 'status', 'waiting', (err, res)=> {
             if(err) console.log(err);
@@ -46,6 +46,7 @@ export default class databaseFunctions {
     }
 }
 
+module.exports = databaseFunctions
 // module.exports = {
 //     addUserToDB,
 //     checkForUser,
