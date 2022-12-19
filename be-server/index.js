@@ -104,23 +104,23 @@ io.on('connection', (socket) => {
 module.exports = app;
 
 ////////// THROW TESTS IN HERE  ////////////
-client.flushall()
-console.log("########  TESTS  ########")
-const testHashKey = "hash_key01"
-const testHashValue = "hash_value01"
+// client.flushall()
+// console.log("########  TESTS  ########")
+// const testHashKey = "hash_key01"
+// const testHashValue = "hash_value01"
 
-client.hset([testHashKey, 'peerID', testHashValue], (err, res) => {
-    if(res == 0) console.log("[Hash SET: Already Exists] key: " + testHashKey + " / value: " + testHashValue)
-    if(res == 1) console.log("[Hash SET: New Entry] key: " + testHashKey + " / value: " + testHashValue)
-})
+// client.hset([testHashKey, 'peerID', testHashValue], (err, res) => {
+//     if(res == 0) console.log("[Hash SET: Already Exists] key: " + testHashKey + " / value: " + testHashValue)
+//     if(res == 1) console.log("[Hash SET: New Entry] key: " + testHashKey + " / value: " + testHashValue)
+// })
 
-client.hget(testHashKey, 'peerID', (err, res) => {
-    if(!res){
-        console.log("[Hash GET: Failed to retrieve] from: " + testHashKey)
-    } else{
-        console.log("[Hash GET] from: " + testHashKey + " / received: " + res)
-    }
-})
+// client.hget(testHashKey, 'peerID', (err, res) => {
+//     if(!res){
+//         console.log("[Hash GET: Failed to retrieve] from: " + testHashKey)
+//     } else{
+//         console.log("[Hash GET] from: " + testHashKey + " / received: " + res)
+//     }
+// })
 
 //addUserToDB(client,"John.Doe", "0987654321")
 ////////////////////////////////////////////

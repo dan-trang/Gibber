@@ -16,7 +16,8 @@ class Users {
             host: 'redis-14138.c259.us-central1-2.gce.cloud.redislabs.com',
             port: 14138,
             password: 'Pj74-qDMbM7BVEpPu'
-        }); 
+        });
+        //this.client.flushall();
         this.waitingListLength = 0;
         this.activeSinglesLength = 0;
     }
