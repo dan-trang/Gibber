@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
         else {
             await database.updateUserConnection(user.userID, user.peerID, socket.id);
         }
-        
+        console.log("Heroku should log Waiting List Add console logs after this: ");
         await database.waitingListAdd(user.userID, socket, io);
         
     });
