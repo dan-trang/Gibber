@@ -121,7 +121,7 @@ class Users {
     }
 
     async getPeerID(userID) {
-        let user2_peerID = await this.client.hget(user2, "peerID", (err,res)=> {
+        let user2_peerID = await this.client.hget(userID, "peerID", (err,res)=> {
             if(err) console.log(err)
             else console.log("peerID 2: " + res)
             return res
