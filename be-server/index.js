@@ -63,8 +63,9 @@ const io = socketio(expressServer, {
 *
 */
 
-
+console.log("Right before connection socket event")
 io.on('connection', (socket) => {
+    console.log("Just started connection event")
     socket.on('peerID', async (user) => {
 
         console.log("[Initial UserID]" + user.userID)
