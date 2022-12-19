@@ -136,11 +136,10 @@ class Users {
         let UID = '';
         while(uniqueID == false) {
             UID = uuidv4();
-            let alreadyInUse = this.checkForUser(UID);
+            let alreadyInUse = await this.checkForUser(UID);
             if(!alreadyInUse) {
                 uniqueID = true;
             }
-            console.log("Generating new UID");
         }
         return UID;
     }
