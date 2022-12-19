@@ -140,6 +140,7 @@ class Users {
             if(!alreadyInUse) {
                 uniqueID = true;
             }
+            console.log("Generating new UID");
         }
         return UID;
     }
