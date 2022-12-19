@@ -16,20 +16,19 @@ class redisWithLock extends Users {
        //should put lock here
        this.lock.acquire('app:feature:lock').then(async () => {
             await this.addUserToWaitingList(userID);
+            let activeSinglesLength = await this.client.llen('activeSingles');
+            let waitingListLength = await this.client.llen('waitingList');
             //function that pairs two users  
-            if(this.activeSinglesLength || this.waitingListLength > 1) {
+            if(activeSinglesLength > 0 || waitingListLength > 1) {
                 let user1;
                 let user2;
-                if(this.activeSinglesLength > 0) {
+                if(activeSinglesLength > 0) {
                     user1 = await this.client.lpop('activeSingles');
                     user2 = await this.client.lpop('waitingList');
-                    this.waitListLength = this.waitListLength - 1;
-                    this.activeSinglesLength = this.activeSinglesLength - 1;
                 }
-                else if(this.waitingListLength > 1) {
+                else if(waitingListLength > 1) {
                     user1 = await this.client.lpop('waitingList');
                     user2 = await this.client.lpop('waitingList');
-                    this.waitListLength = this.waitListLength-2;
                 }
                 //update user1 and user2 status and talkPartner fields
                 this.updateUserStatus(user1, userStatus.InCall);
@@ -65,20 +64,19 @@ class redisWithLock extends Users {
             await this.addUserToActiveSingles(userID);
             await this.updateUserStatus(userID, userStatus.activeSingles);
             await this.updateUserTalkPartner(userID, '');
+            let activeSinglesLength = await this.client.llen('activeSingles');
+            let waitingListLength = await this.client.llen('waitingList');
             //function that pairs two users  
-            if(this.activeSinglesLength > 1 || this.waitingListLength > 0) {
+            if(activeSinglesLength > 1 || waitingListLength > 0) {
                 let user1;
                 let user2;
-                if(this.activeSinglesLength > 1) {
+                if(activeSinglesLength > 1) {
                     user1 = await this.client.lpop('activeSingles');
                     user2 = await this.client.lpop('activeSingles');
-                    this.activeSinglesLength = this.activeSinglesLength - 2;
                 }
-                else if(this.waitingListLength > 0) {
+                else if(waitingListLength > 0) {
                     user1 = await this.client.lpop('activeSingles');
                     user2 = await this.client.lpop('waitingList');
-                    this.activeSinglesLength = this.activeSinglesLength - 1;
-                    this.waitingListLength = this.waitingListLength - 1;
                 }
                 //update user1 and user2 status and talkPartner fields
                 this.updateUserStatus(user1, userStatus.InCall);
@@ -126,6 +124,8 @@ class redisWithLock extends Users {
         });
         
     }
+
+    
 
     async pairUsers(userID, socket, io) {
         

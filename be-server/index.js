@@ -73,8 +73,12 @@ io.on('connection', (socket) => {
         //check if userID is in the database as a user hash key already...
         
         let userInDatabase = await database.checkForUser(user.userID);
+        let userID;
         if(!userInDatabase) {
-            let userID = await database.generateUID();
+            if(user.userID == null || user.userID == undefined)
+                userID = await database.generateUID();
+            else
+                userID = user.userID;
             io.to(socket.id).emit('newUID', {
                 newUID: userID
             })
