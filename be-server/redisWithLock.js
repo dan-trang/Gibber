@@ -1,5 +1,5 @@
 const Users = require('./Users.js');
-const userState = require("./userStates.js");
+const userStatus = require("./userStates.js");
 
 class redisWithLock extends Users {
     constructor() {
@@ -63,7 +63,7 @@ class redisWithLock extends Users {
         this.lock.acquire('app:feature:lock').then(async () => {
             console.log("In active SinglesADD inside of lock")
             await this.addUserToActiveSingles(userID);
-            await this.updateUserStatus(userID, userState.activeSingles);
+            await this.updateUserStatus(userID, userStatus.activeSingles);
             await this.updateUserTalkPartner(userID, '');
             //function that pairs two users  
             if(this.activeSinglesLength > 1 || this.waitingListLength > 0) {
@@ -111,7 +111,7 @@ class redisWithLock extends Users {
     async clickedLeave(userID) {
         this.lock.acquire('app:feature:lock').then(async () => {
             await this.updateUserTalkPartner(userID, '');
-            await this.updateUserStatus(userID, userState.Disconnected);
+            await this.updateUserStatus(userID, userStatus.Disconnected);
             return this.lock.release();
         }).then(() => {
         // Lock has been released
