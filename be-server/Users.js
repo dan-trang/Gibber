@@ -112,7 +112,7 @@ class Users {
     }
 
     async getSocketID(userID) {
-        let user1_socketID = await client.hget(user1, "socketID", (err,res)=> {
+        let user1_socketID = await this.client.hget(user1, "socketID", (err,res)=> {
             if(err) console.log(err)
             else console.log("socketID 1: " + res)
             return res
@@ -121,7 +121,7 @@ class Users {
     }
 
     async getPeerID(userID) {
-        let user2_peerID = await client.hget(user2, "peerID", (err,res)=> {
+        let user2_peerID = await this.client.hget(user2, "peerID", (err,res)=> {
             if(err) console.log(err)
             else console.log("peerID 2: " + res)
             return res
