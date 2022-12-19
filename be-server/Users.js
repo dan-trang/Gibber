@@ -112,7 +112,7 @@ class Users {
     }
 
     async getSocketID(userID) {
-        let user1_socketID = await this.client.hget(user1, "socketID", (err,res)=> {
+        let user1_socketID = await this.client.hget(userID, "socketID", (err,res)=> {
             if(err) console.log(err)
             else console.log("socketID 1: " + res)
             return res
