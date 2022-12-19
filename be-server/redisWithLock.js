@@ -14,7 +14,7 @@ class redisWithLock extends Users {
 
     async waitingListAdd(userID, socket, io) {
        //should put lock here
-       lock.acquire('app:feature:lock').then(async () => {
+       this.lock.acquire('app:feature:lock').then(async () => {
             await this.addUserToWaitingList(userID);
             //function that pairs two users  
             if(this.activeSinglesLength || this.waitingListLength > 1) {
@@ -44,7 +44,7 @@ class redisWithLock extends Users {
                 io.to(user1_socketID).emit('remoteID', {remote: user2_peerID})
             }
 
-            return lock.release();
+            return this.lock.release();
         }).then(() => {
         // Lock has been released
             console.log("Waiting List ADD event occurred")
@@ -60,7 +60,7 @@ class redisWithLock extends Users {
 
     async activeSinglesAdd(userID, io) {
         console.log("In activeSinglesADD outside of lock")
-        lock.acquire('app:feature:lock').then(async () => {
+        this.lock.acquire('app:feature:lock').then(async () => {
             console.log("In active SinglesADD inside of lock")
             await this.addUserToActiveSingles(userID);
             await this.updateUserStatus(userID, userState.activeSingles);
@@ -93,7 +93,7 @@ class redisWithLock extends Users {
                 io.to(user1_socketID).emit('remoteID', {remote: user2_peerID})
             }
 
-            return lock.release();
+            return this.lock.release();
         }).then(() => {
         // Lock has been released
             console.log("Active Singles ADD event occurred")
@@ -109,10 +109,10 @@ class redisWithLock extends Users {
     }
 
     async clickedLeave(userID) {
-        lock.acquire('app:feature:lock').then(async () => {
+        this.lock.acquire('app:feature:lock').then(async () => {
             await this.updateUserTalkPartner(userID, '');
             await this.updateUserStatus(userID, userState.Disconnected);
-            return lock.release();
+            return this.lock.release();
         }).then(() => {
         // Lock has been released
             console.log("User Clicked LEave status updated")
