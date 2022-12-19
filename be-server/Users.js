@@ -8,6 +8,7 @@
 */
 const { v4: uuidv4 } = require('uuid');
 const userState = require("./userStates.js");
+const Redis = require("ioredis");
 
 class Users {
     constructor() {
@@ -16,7 +17,7 @@ class Users {
             port: 14138,
             password: 'Pj74-qDMbM7BVEpPu'
         }); 
-        this.waitListLength = 0;
+        this.waitingListLength = 0;
         this.activeSinglesLength = 0;
     }
     async addUserToDB(userID, peerID, socketID) { //timestamp param could go here
@@ -56,9 +57,9 @@ class Users {
         //update status
         await this.updateUserStatus(userID, userState.ActiveSingles);
         //return activeSingles Length
-        let length = await this.client.llen('activeSingles');
-        this.activeSinglesLength = length;
-        return length;
+        //let length = await this.client.llen('activeSingles');
+        this.activeSinglesLength = this.activeSinglesLength + 1;
+        return this.activeSinglesLength;
     }
 
     async addUserToWaitingList(userID) {
@@ -66,9 +67,9 @@ class Users {
         //update status
         await this.updateUserStatus(userID, userState.Waiting);
         //return waitingList length
-        let length = await this.client.llen('waitingList');
-        this.waitListLength = length;
-        return length;
+        //let length = await this.client.llen('waitingList');
+        this.waitingListLength = this.waitingListLength + 1;
+        return this.waitingListLength;
     }
     //Function checks if the user already has an ID stored on their
     //local browser, eventually want to have accounts

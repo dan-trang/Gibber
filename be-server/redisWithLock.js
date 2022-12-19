@@ -1,16 +1,13 @@
-const Redis = require("ioredis");
 const Users = require('./Users.js');
 const userState = require("./userStates.js");
 
 class redisWithLock extends Users {
     constructor() {
         super();
-        this.lock = require('./public_modules/ioredis-lock/lib/redislock').createLock(client, {
+        this.lock = require('./public_modules/ioredis-lock/lib/redislock').createLock(this.client, {
             retries: 10,
             delay: 10000
         });
-        this.waitList = 0;
-        this.activeSingles = 0;
         this.LockAcquisitionError = this.lock.LockAcquisitionError;
         this.LockReleaseError = this.lock.LockReleaseError;
     }
@@ -24,12 +21,15 @@ class redisWithLock extends Users {
                 let user1;
                 let user2;
                 if(this.activeSinglesLength > 0) {
-                    user1 = this.client.lpop('activeSingles');
-                    user2 = this.client.lpop('waitingList');
+                    user1 = await this.client.lpop('activeSingles');
+                    user2 = await this.client.lpop('waitingList');
+                    this.waitListLength = this.waitListLength - 1;
+                    this.activeSinglesLength = this.activeSinglesLength - 1;
                 }
                 else if(this.waitingListLength > 1) {
-                    user1 = this.client.lpop('waitingList');
-                    user2 = this.client.lpop('waitingList');
+                    user1 = await this.client.lpop('waitingList');
+                    user2 = await this.client.lpop('waitingList');
+                    this.waitListLength = this.waitListLength-2;
                 }
                 //update user1 and user2 status and talkPartner fields
                 this.updateUserStatus(user1, userStatus.InCall);
@@ -68,12 +68,15 @@ class redisWithLock extends Users {
                 let user1;
                 let user2;
                 if(this.activeSinglesLength > 1) {
-                    user1 = this.client.lpop('activeSingles');
-                    user2 = this.client.lpop('activeSingles');
+                    user1 = await this.client.lpop('activeSingles');
+                    user2 = await this.client.lpop('activeSingles');
+                    this.activeSinglesLength = this.activeSinglesLength - 2;
                 }
                 else if(this.waitingListLength > 0) {
-                    user1 = this.client.lpop('activeSingles');
-                    user2 = this.client.lpop('waitingList');
+                    user1 = await this.client.lpop('activeSingles');
+                    user2 = await this.client.lpop('waitingList');
+                    this.activeSinglesLength = this.activeSinglesLength - 1;
+                    this.waitingListLength = this.waitingListLength - 1;
                 }
                 //update user1 and user2 status and talkPartner fields
                 this.updateUserStatus(user1, userStatus.InCall);
