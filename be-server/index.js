@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
         
         let userInDatabase = await database.checkForUser(user.userID);
         if(!userInDatabase) {
-            let userID = database.generateUID();
+            let userID = await database.generateUID();
             io.to(socket.id).emit('newUID', {
                 newUID: userID
             })
