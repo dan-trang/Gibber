@@ -144,7 +144,7 @@ const Chatroom = ( {socket} ) => {
                     // remoteUserVideoRef.current.removeAttribute('src');
                     // remoteUserVideoRef.current.load();
                     //put me into active singles here
-                    socket.emit('remote leave', {userId: localStorage.getItem('userID')})
+                    socket.emit('remote leave', {userID: localStorage.getItem('userID')})
                     //set remote peer to null, disconnect dataConnection
                 }
             });
@@ -161,6 +161,7 @@ const Chatroom = ( {socket} ) => {
         console.log("Leaving the call...");
         let payload = {'msg': 'leave', 'remoteID': localStorage.getItem('userID')};
         dataConn.send(payload);
+        socket.emit('clickedLeave', {userID: localStorage.getItem('userID')});
         localUserVideoRef.current.stop(); 
          
         console.log("leave was maybe sent"); 
