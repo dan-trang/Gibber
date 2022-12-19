@@ -18,8 +18,6 @@ class Users {
             password: 'Pj74-qDMbM7BVEpPu'
         });
         //this.client.flushall();
-        this.waitingListLength = 0;
-        this.activeSinglesLength = 0;
     }
     async addUserToDB(userID, peerID, socketID) { //timestamp param could go here
         const result = await this.client.hset(userID, 'peerID', peerID, 'socketID', socketID, 'status', userState.Waiting, (err, res)=> {
@@ -59,8 +57,8 @@ class Users {
         await this.updateUserStatus(userID, userState.ActiveSingles);
         //return activeSingles Length
         //let length = await this.client.llen('activeSingles');
-        this.activeSinglesLength = this.activeSinglesLength + 1;
-        return this.activeSinglesLength;
+        let activeSinglesLength = this.client.llen('activeSingles');
+        return activeSinglesLength;
     }
 
     async addUserToWaitingList(userID) {
@@ -69,8 +67,8 @@ class Users {
         await this.updateUserStatus(userID, userState.Waiting);
         //return waitingList length
         //let length = await this.client.llen('waitingList');
-        this.waitingListLength = this.waitingListLength + 1;
-        return this.waitingListLength;
+        let waitingListLength = await this.client.llen('waitingList');
+        return waitingListLength;
     }
     //Function checks if the user already has an ID stored on their
     //local browser, eventually want to have accounts
