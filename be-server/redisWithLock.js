@@ -59,7 +59,9 @@ class redisWithLock extends Users {
     }
 
     async activeSinglesAdd(userID, io) {
+        console.log("In activeSinglesADD outside of lock")
         lock.acquire('app:feature:lock').then(async () => {
+            console.log("In active SinglesADD inside of lock")
             await this.addUserToActiveSingles(userID);
             await this.updateUserStatus(userID, userState.activeSingles);
             await this.updateUserTalkPartner(userID, '');
