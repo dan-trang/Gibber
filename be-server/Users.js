@@ -129,7 +129,7 @@ class Users {
         return user2_peerID;
     }
 
-    generateUID() {
+    async generateUID() {
         //continue to generate new UID until not in database
         //based on probability should almost always be unique
         let uniqueID = false;
