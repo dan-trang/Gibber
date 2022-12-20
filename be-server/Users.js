@@ -29,6 +29,24 @@ class Users {
         return result;
     }
 
+    async removeFromLists(userID, status) {
+        if(status == userState.Waiting) {
+            await this.client.lrem('waitingList', 1, userID);
+        }
+        if(status == userState.ActiveSingles) {
+            await this.client.lrem('activeSingles', 1, userID);
+        }
+    }
+
+    async isAvailable(userID) {
+        let status = await this.client.hget(userID, 'status');
+        let available = false;
+        if(status == userState.ActiveSingles || status == userState.Waiting) {
+            available = true;
+        }
+        return available;
+    }
+
     async checkForUser(userID) {
         const alreadyJoined = await this.client.hexists(`${userID}`,"peerID",(err, res)=> {
             if (err) console.log(err);

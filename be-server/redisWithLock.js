@@ -1,4 +1,5 @@
 const Users = require('./Users.js');
+const userState = require('./userStates.js');
 const userStatus = require("./userStates.js");
 
 class redisWithLock extends Users {
@@ -62,7 +63,7 @@ class redisWithLock extends Users {
         this.lock.acquire('app:feature:lock').then(async () => {
             console.log("In active SinglesADD inside of lock")
             await this.addUserToActiveSingles(userID);
-            await this.updateUserStatus(userID, userStatus.activeSingles);
+            await this.updateUserStatus(userID, userState.ActiveSingles);
             await this.updateUserTalkPartner(userID, '');
             let activeSinglesLength = await this.client.llen('activeSingles');
             let waitingListLength = await this.client.llen('waitingList');
@@ -106,8 +107,74 @@ class redisWithLock extends Users {
         
     }
 
-    async setUserToAvoid(userID1, userID2) {
-        
+
+    async setUserAvoidance(io, userID1, userID2, timeToAvoid) {
+        //first add a hash to the database composed of both uids
+        //seperate uids by z
+        //put id that is less first
+        //in milliseconds
+        timeToAvoid = timeToAvoid * 1000;
+        let key;
+        if(userID1 > userID2)
+            key = `${userID1}z${userID2}`;
+        else
+            key = `${userID2}z${userID1}`;
+        this.lock.acquire('app:feature:lock').then(async () => {
+            await this.client.hset(key);
+            return this.lock.release();
+            }).then(() => {
+            // Lock has been released
+                
+                console.log("Active Singles ADD event occurred")
+                console.log("**************  END ******************")
+            }).catch(this.LockAcquisitionError, (err) => {
+                console.log("Acquisition Error" + err)
+            // The lock could not be acquired
+            }).catch(this.LockReleaseError, (err) => {
+                console.log("Release Error" + err)
+            // The lock could not be released
+            });
+            setTimeout(()=> {
+                this.lock.acquire('app:feature:lock').then(async () => {
+                    //delete key
+                    await this.client.del(key);
+                    //send io message
+                    let socketID = await this.client.hget(userID1, 'socketID');
+                    io.to(socketID).emit('avoidExpired');
+                    let user1isAvailable = await this.isAvailable(userID1);
+                    let user2isAvailable= await this.isAvailable(userID2);
+                    if(user1isAvailable && user2isAvailable) {
+                        let user1Status = await this.client.hget(userID1, 'status');
+                        let user2Status = await this.client.hget(userID2, 'status');
+                        await this.removeFromLists(userID1, user1Status);
+                        await this.removeFromLists(userID2, user2Status);
+                        await this.updateUserStatus(userID1, userState.InCall);
+                        await this.updateUserStatus(userID2, userState.InCall);
+                        await this.updateUserTalkPartner(userID1, userID2);
+                        await this.updateUserTalkPartner(userID2, userID1);
+
+                        //send socket.io message
+                        //Make sure that user States are updated correctly
+                        //send peer2 id to socket1
+                    }
+                    
+                    
+                    return this.lock.release();
+                    }).then(() => {
+                    // Lock has been released
+                        
+                        console.log("Sent message of Avoidance Expiration")
+                        console.log("**************  END ******************")
+                    }).catch(this.LockAcquisitionError, (err) => {
+                        console.log("Acquisition Error" + err)
+                    // The lock could not be acquired
+                    }).catch(this.LockReleaseError, (err) => {
+                        console.log("Release Error" + err)
+                    // The lock could not be released
+                    });
+                }, timeToAvoid);
+            //setTimeout needed
+            
     }
 
     async clickedLeave(userID) {
