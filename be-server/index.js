@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
         }
         console.log("Heroku should log Waiting List Add console logs after this: ");
         await database.waitingListAdd(user.userID, socket, io);
-        
+        console.log(await database.client.lrange('waitingList', 0 , 1));
     });
 
     //Add user active singles
