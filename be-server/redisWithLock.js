@@ -106,6 +106,10 @@ class redisWithLock extends Users {
         
     }
 
+    async setUserToAvoid(userID1, userID2) {
+        
+    }
+
     async clickedLeave(userID) {
         this.lock.acquire('app:feature:lock').then(async () => {
             await this.updateUserTalkPartner(userID, '');
