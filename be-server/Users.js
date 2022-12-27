@@ -159,6 +159,10 @@ class Users {
         }
         return UID;
     }
+    async getPartnerID(UID) {
+        let PartnerID = await this.client.hget(UID,'talkPartner')
+        return PartnerID;
+    }
     // async handleUserLogIn(user) {
     //     let userID = await this.checkUserID(user);
     //     await addUserToDB(userID, user.peerID, socket.id);
