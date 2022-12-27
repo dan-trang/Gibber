@@ -23,6 +23,10 @@ class redisWithLock extends Users {
             if(activeSinglesLength > 0 || waitingListLength > 1) {
                 let user1;
                 let user2;
+                let first_in_line = await this.client.lrange('waitingList',0,1);
+                let first_in_activeSingles = await this.client.lrange('activeSingles',0,1);
+                console.log(`The first person in waitingRoom is: ${first_in_line}`);
+                console.log(`The first in Active Singles is: ${first_in_activeSingles}`);
                 if(activeSinglesLength > 0) {
                     user1 = await this.client.lpop('activeSingles');
                     user2 = await this.client.lpop('waitingList');
