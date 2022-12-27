@@ -98,7 +98,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('clickedLeave', async (user)=> {
-        await database.clickedLeave(user.userID);
+        await database.clickedLeave(user.userID, io);
     })
 
     socket.on("disconnect", (reason)=> {

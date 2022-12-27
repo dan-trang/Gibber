@@ -181,10 +181,16 @@ class redisWithLock extends Users {
             
     }
 
-    async clickedLeave(userID) {
+    async clickedLeave(userID, io) {
         this.lock.acquire('app:feature:lock').then(async () => {
+            let PartnerID = await this.getPartnerID(userID);
             await this.updateUserTalkPartner(userID, '');
             await this.updateUserStatus(userID, userStatus.Disconnected);
+            //add setUserAvoidance function here
+            //Question: Should I use await with the function?
+            //It should be fine to call with await since I am
+            //using setTimeout which it wont pause for won't pause for
+            await this.setUserAvoidance(io, userID, PartnerID, 30);
             return this.lock.release();
         }).then(() => {
         // Lock has been released
