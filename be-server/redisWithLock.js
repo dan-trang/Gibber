@@ -124,7 +124,9 @@ class redisWithLock extends Users {
         else
             key = `${userID2}z${userID1}`;
         this.lock.acquire('app:feature:lock').then(async () => {
-            await this.client.hset(key);
+            console.log(`The key for collision detection is: ${key}`);
+            let result = await this.client.hset(key);
+            console.log(`The result of the add is ${result}`);
             return this.lock.release();
             }).then(() => {
             // Lock has been released
