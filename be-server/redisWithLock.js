@@ -118,11 +118,15 @@ class redisWithLock extends Users {
         //put id that is less first
         //in milliseconds
         timeToAvoid = timeToAvoid * 1000;
+        console.log(`Time to avoid is ${timeToAvoid}`);
         let key;
-        if(userID1 > userID2)
+        if(userID1 > userID2) {
             key = `${userID1}z${userID2}`;
-        else
-            key = `${userID2}z${userID1}`;
+        }
+        else {
+           key = `${userID2}z${userID1}`; 
+        }
+            
         this.lock.acquire('app:feature:lock').then(async () => {
             console.log(`The key for collision detection is: ${key}`);
             let result = await this.client.hset(key);
